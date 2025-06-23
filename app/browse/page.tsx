@@ -153,7 +153,6 @@ export default function BrowseProfessionals() {
     return `${firstName} ${lastName}`.trim() || 'Professional'
   }
 
-  const currentFilters = searchService.buildProfessionalFiltersFromUrl(searchParams)
   const currentFilters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(searchParams))
 
   return (
