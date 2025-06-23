@@ -1,5 +1,3 @@
-'use client'
-
 import { supabase } from './supabase'
 
 export interface JobSearchFilters {
@@ -60,6 +58,162 @@ export interface SearchResult<T> {
   data: T[]
   total: number
   hasMore: boolean
+}
+
+// Job queries
+export const jobQueries = {
+  async getJobById(jobId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select(`
+        *,
+        profiles:hirer_id (
+          id,
+          first_name,
+          last_name,
+          company_name,
+          avatar_url,
+          bio,
+          location,
+          is_verified
+        )
+      `)
+      .eq('id', jobId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async getJobsByHirer(hirerId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('hirer_id', hirerId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createJob(jobData: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert(jobData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateJob(jobId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .update(updates)
+      .eq('id', jobId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteJob(jobId: string) {
+    const { error } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('id', jobId)
+
+    if (error) throw error
+  }
+}
+
+// Application queries
+export const applicationQueries = {
+  async getApplicationsByJob(jobId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        profiles:professional_id (
+          id,
+          first_name,
+          last_name,
+          avatar_url,
+          is_verified
+        ),
+        professional_profiles:professional_id (
+          title,
+          hourly_rate,
+          rating,
+          total_reviews,
+          skills
+        )
+      `)
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getApplicationsByProfessional(professionalId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        jobs (
+          id,
+          title,
+          status,
+          salary_min,
+          salary_max,
+          salary_type,
+          company_name:profiles!jobs_hirer_id_fkey(company_name)
+        )
+      `)
+      .eq('professional_id', professionalId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createApplication(applicationData: any) {
+    const { data, error } = await supabase
+      .from('applications')
+      .insert(applicationData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateApplicationStatus(applicationId: string, status: string, notes?: string) {
+    const updates: any = { status }
+    if (notes) updates.hirer_notes = notes
+
+    const { data, error } = await supabase
+      .from('applications')
+      .update(updates)
+      .eq('id', applicationId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteApplication(applicationId: string) {
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', applicationId)
+
+    if (error) throw error
+  }
 }
 
 export const searchService = {
@@ -349,32 +503,5 @@ export const searchService = {
     })
     
     return params
-  },
-
-  async getApplicationsByJob(jobId: string) {
-    const { data, error } = await supabase
-      .from('applications')
-      .select(`
-        *,
-        profiles:professional_id (
-          id,
-          first_name,
-          last_name,
-          avatar_url,
-          is_verified
-        ),
-        professional_profiles:professional_id (
-          title,
-          hourly_rate,
-          rating,
-          total_reviews,
-          skills
-        )
-      `)
-      .eq('job_id', jobId)
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
-    return data
   }
 }

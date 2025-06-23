@@ -83,7 +83,7 @@ export default function BrowseProfessionals() {
 
   useEffect(() => {
     // Load initial filters from URL
-    const initialFilters = searchService.buildProfessionalFiltersFromUrl(searchParams)
+    const initialFilters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(searchParams))
     handleSearch(initialFilters)
   }, [searchParams])
 
@@ -133,7 +133,7 @@ export default function BrowseProfessionals() {
   }
 
   const handleLoadMore = () => {
-    const currentFilters = searchService.buildProfessionalFiltersFromUrl(searchParams)
+    const currentFilters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(searchParams))
     handleSearch(currentFilters, currentPage + 1)
   }
 
@@ -154,6 +154,7 @@ export default function BrowseProfessionals() {
   }
 
   const currentFilters = searchService.buildProfessionalFiltersFromUrl(searchParams)
+  const currentFilters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(searchParams))
 
   return (
     <div className="min-h-screen bg-gray-50">
