@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -35,12 +35,15 @@ export default function BrowsePage() {
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [skillFilter, setSkillFilter] = useState('')
+  const [skillFilter, setSkillFilter] = useState('all')
   const [locationFilter, setLocationFilter] = useState('')
-  const [rateFilter, setRateFilter] = useState('')
-  const [availabilityFilter, setAvailabilityFilter] = useState('')
+  const [rateFilter, setRateFilter] = useState('all')
+  const [availabilityFilter, setAvailabilityFilter] = useState('all')
   
-  const supabase = createClientComponentClient()
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
     fetchProfessionals()
@@ -79,13 +82,13 @@ export default function BrowsePage() {
       professional.profiles?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       professional.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const matchesSkill = !skillFilter || 
+    const matchesSkill = skillFilter === 'all' || 
       professional.skills?.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()))
 
     const matchesLocation = !locationFilter || 
       professional.profiles?.location?.toLowerCase().includes(locationFilter.toLowerCase())
 
-    const matchesRate = !rateFilter || (() => {
+    const matchesRate = rateFilter === 'all' || (() => {
       const rate = professional.hourly_rate || 0
       switch (rateFilter) {
         case 'under-50': return rate < 50
@@ -96,7 +99,7 @@ export default function BrowsePage() {
       }
     })()
 
-    const matchesAvailability = !availabilityFilter || 
+    const matchesAvailability = availabilityFilter === 'all' || 
       professional.availability_status === availabilityFilter
 
     return matchesSearch && matchesSkill && matchesLocation && matchesRate && matchesAvailability
@@ -177,7 +180,7 @@ export default function BrowsePage() {
                   <SelectValue placeholder="Filter by skill" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Skills</SelectItem>
+                  <SelectItem value="all">All Skills</SelectItem>
                   <SelectItem value="javascript">JavaScript</SelectItem>
                   <SelectItem value="python">Python</SelectItem>
                   <SelectItem value="react">React</SelectItem>
@@ -197,7 +200,7 @@ export default function BrowsePage() {
                   <SelectValue placeholder="Hourly rate" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Rate</SelectItem>
+                  <SelectItem value="all">Any Rate</SelectItem>
                   <SelectItem value="under-50">Under $50/hr</SelectItem>
                   <SelectItem value="50-100">$50-100/hr</SelectItem>
                   <SelectItem value="100-200">$100-200/hr</SelectItem>
@@ -210,7 +213,7 @@ export default function BrowsePage() {
                   <SelectValue placeholder="Availability" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Availability</SelectItem>
+                  <SelectItem value="all">Any Availability</SelectItem>
                   <SelectItem value="available">Available</SelectItem>
                   <SelectItem value="busy">Busy</SelectItem>
                   <SelectItem value="unavailable">Unavailable</SelectItem>
@@ -238,10 +241,10 @@ export default function BrowsePage() {
             <p className="text-gray-600 mb-4">Try adjusting your search criteria or filters</p>
             <Button onClick={() => {
               setSearchTerm('')
-              setSkillFilter('')
+              setSkillFilter('all')
               setLocationFilter('')
-              setRateFilter('')
-              setAvailabilityFilter('')
+              setRateFilter('all')
+              setAvailabilityFilter('all')
             }}>
               Clear All Filters
             </Button>
