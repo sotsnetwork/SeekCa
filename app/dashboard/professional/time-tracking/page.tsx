@@ -8,21 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Clock, 
-  Calendar,
-  Play,
-  Pause,
-  Stop,
-  Save,
-  X,
-  BarChart,
-  DollarSign,
-  Filter,
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle
-} from 'lucide-react'
+import { Clock, Calendar, Play, Pause, Store as Stop, Save, X, BarChart, DollarSign, Filter, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { projectService, Project, TimeEntry } from '@/lib/project-management'
 import Link from 'next/link'
