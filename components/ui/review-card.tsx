@@ -1,222 +1,195 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Star, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react'
+import { Star, ThumbsUp, Calendar } from 'lucide-react'
 import { ReviewWithDetails } from '@/lib/reviews'
-import { cn } from '@/lib/utils'
 
 interface ReviewCardProps {
   review: ReviewWithDetails
-  currentUserId?: string
   onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void
-  onRespond?: (reviewId: string) => void
-  className?: string
+  canVote?: boolean
+  showJobDetails?: boolean
+  compact?: boolean
 }
 
-export function ReviewCard({
-  review,
-  currentUserId,
-  onVoteHelpful,
-  onRespond,
-  className
+export function ReviewCard({ 
+  review, 
+  onVoteHelpful, 
+  canVote = true,
+  showJobDetails = true,
+  compact = false
 }: ReviewCardProps) {
-  const [userVote, setUserVote] = useState<boolean | null>(null)
-
-  const renderStars = (rating: number, size = 'sm') => {
-    return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={cn(
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300',
-              size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'
-            )}
-          />
-        ))}
-      </div>
-    )
+  const [voted, setVoted] = useState(false)
+  
+  const handleVoteHelpful = () => {
+    if (onVoteHelpful && !voted) {
+      onVoteHelpful(review.id, true)
+      setVoted(true)
+    }
   }
-
-  const handleVote = (isHelpful: boolean) => {
-    if (!currentUserId || !onVoteHelpful) return
-    
-    const newVote = userVote === isHelpful ? null : isHelpful
-    setUserVote(newVote)
-    onVoteHelpful(review.review_id, isHelpful)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
+  
   return (
-    <Card className={cn("", className)}>
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={review.reviewer_avatar} alt={review.reviewer_name} />
-              <AvatarFallback className="bg-blue-100 text-blue-700">
-                {review.reviewer_name?.[0] || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="flex items-center space-x-2 mb-1">
-                <h4 className="font-semibold text-gray-900">
-                  {review.reviewer_name || 'Anonymous'}
-                </h4>
-                {review.reviewer_company && (
-                  <Badge variant="outline" className="text-xs">
-                    {review.reviewer_company}
-                  </Badge>
-                )}
+    <Card className={`overflow-hidden ${compact ? 'border-0 shadow-none' : ''}`}>
+      <CardContent className={compact ? 'p-3' : 'p-6'}>
+        <div className="flex items-start">
+          <div className="flex-1">
+            <div className="flex items-center mb-2">
+              <div className="flex mr-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-${compact ? '4' : '5'} h-${compact ? '4' : '5'} ${
+                      star <= review.rating
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
               </div>
-              <div className="flex items-center space-x-2 mb-2">
-                {renderStars(review.rating)}
-                <span className="text-sm font-medium text-gray-900">
-                  {review.rating}.0
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">
-                {formatDate(review.created_at)}
-              </p>
+              <h3 className={`${compact ? 'text-base' : 'text-lg'} font-semibold text-gray-900`}>
+                {review.title || `${review.rating}-Star Review`}
+              </h3>
             </div>
-          </div>
-          
-          {review.would_recommend && (
-            <Badge variant="default" className="bg-green-100 text-green-800">
-              Recommends
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Review Title */}
-        {review.title && (
-          <h5 className="font-medium text-gray-900">{review.title}</h5>
-        )}
-
-        {/* Review Comment */}
-        {review.comment && (
-          <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-        )}
-
-        {/* Category Ratings */}
-        {(review.skills_rating || review.communication_rating || 
-          review.timeliness_rating || review.professionalism_rating) && (
-          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-            {review.skills_rating && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Skills</span>
-                {renderStars(review.skills_rating)}
-              </div>
-            )}
-            {review.communication_rating && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Communication</span>
-                {renderStars(review.communication_rating)}
-              </div>
-            )}
-            {review.timeliness_rating && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Timeliness</span>
-                {renderStars(review.timeliness_rating)}
-              </div>
-            )}
-            {review.professionalism_rating && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Professionalism</span>
-                {renderStars(review.professionalism_rating)}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Job Context */}
-        {review.job_title && (
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">Project:</span> {review.job_title}
-          </div>
-        )}
-
-        {/* Professional Response */}
-        {review.response_text && (
-          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-            <div className="flex items-center space-x-2 mb-2">
-              <MessageSquare className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
-                Professional Response
-              </span>
-              {review.response_created_at && (
-                <span className="text-xs text-blue-700">
-                  {formatDate(review.response_created_at)}
-                </span>
+            
+            <div className="flex items-center text-sm text-gray-500 mb-2">
+              <Calendar className="w-4 h-4 mr-1" />
+              {new Date(review.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+              {showJobDetails && review.job_title && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span>Project: {review.job_title}</span>
+                </>
               )}
             </div>
-            <p className="text-sm text-blue-800">{review.response_text}</p>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="flex items-center space-x-4">
-            {/* Helpful Votes */}
-            {currentUserId && onVoteHelpful && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Helpful?</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleVote(true)}
-                  className={cn(
-                    "h-8 px-2",
-                    userVote === true && "bg-green-100 text-green-700"
-                  )}
-                >
-                  <ThumbsUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleVote(false)}
-                  className={cn(
-                    "h-8 px-2",
-                    userVote === false && "bg-red-100 text-red-700"
-                  )}
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                </Button>
+            
+            <p className={`text-gray-700 ${compact ? 'text-sm mb-2 line-clamp-2' : 'mb-4'}`}>
+              {review.comment}
+            </p>
+            
+            {!compact && (review.skills_rating || review.communication_rating || 
+              review.timeliness_rating || review.professionalism_rating) && (
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {review.skills_rating && (
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 mr-2">Skills:</span>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.skills_rating!
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {review.communication_rating && (
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 mr-2">Communication:</span>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.communication_rating!
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {review.timeliness_rating && (
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 mr-2">Timeliness:</span>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.timeliness_rating!
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {review.professionalism_rating && (
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 mr-2">Professionalism:</span>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.professionalism_rating!
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
-            {review.helpful_count > 0 && (
-              <span className="text-sm text-gray-600">
-                {review.helpful_count} found this helpful
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Avatar className={`h-${compact ? '6' : '8'} w-${compact ? '6' : '8'} mr-2`}>
+                  <AvatarImage src={review.reviewer_avatar} alt={review.reviewer_name || ''} />
+                  <AvatarFallback className="bg-gray-100 text-gray-600">
+                    {review.reviewer_name?.[0] || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className={`${compact ? 'text-sm' : 'font-medium'} text-gray-900`}>
+                  {review.reviewer_name || 'Anonymous'}
+                </span>
+                {!compact && review.reviewer_company && (
+                  <span className="text-gray-500 ml-2">
+                    from {review.reviewer_company}
+                  </span>
+                )}
+              </div>
+              {!compact && onVoteHelpful && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleVoteHelpful}
+                  disabled={!canVote || voted}
+                >
+                  <ThumbsUp className="w-4 h-4 mr-2" />
+                  Helpful ({review.helpful_count})
+                </Button>
+              )}
+            </div>
+            
+            {/* Response to review */}
+            {!compact && review.response_text && (
+              <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <span className="font-medium text-gray-900">Response from Professional</span>
+                </div>
+                <p className="text-gray-700 text-sm">{review.response_text}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {review.response_created_at && new Date(review.response_created_at).toLocaleDateString()}
+                </p>
+              </div>
             )}
           </div>
-
-          {/* Response Button */}
-          {currentUserId && onRespond && !review.response_text && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onRespond(review.review_id)}
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Respond
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>
