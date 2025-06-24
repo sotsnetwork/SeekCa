@@ -216,6 +216,138 @@ export const applicationQueries = {
   }
 }
 
+  async getProfessionalProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .select(`
+        *,
+        profiles (
+          id,
+          first_name,
+          last_name,
+          email,
+          location,
+          avatar_url,
+          bio,
+          website,
+          linkedin_url,
+          is_verified,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async createProfessionalProfile(profileData: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .insert(profileData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateProfessionalProfile(userId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+}
+
+// Message queries
+export const messageQueries = {
+  async getConversations(userId: string) {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(`
+        *,
+        job:jobs(id, title),
+        hirer:profiles!conversations_hirer_id_fkey(
+          id, first_name, last_name, company_name, avatar_url
+        ),
+        professional:profiles!conversations_professional_id_fkey(
+          id, first_name, last_name, avatar_url
+        )
+      `)
+      .or(`hirer_id.eq.${userId},professional_id.eq.${userId}`)
+      .order('last_message_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getMessages(conversationId: string) {
+    const { data, error } = await supabase
+      .from('messages')
+      .select(`
+        *,
+        sender:profiles(first_name, last_name, avatar_url)
+      `)
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async sendMessage(messageData: any) {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(messageData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async markMessagesAsRead(conversationId: string, userId: string) {
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', userId)
+      .eq('is_read', false)
+
+    if (error) throw error
+  }
+}
+
+export interface Job {
+  id: string
+  hirer_id: string
+  title: string
+  description: string
+  category: string
+  job_type: string
+  location?: string
+  remote_allowed: boolean
+  salary_type: string
+  salary_min?: number
+  salary_max?: number
+  required_skills: string[]
+  required_licenses: string[]
+  requirements: string[]
+  is_urgent: boolean
+  status: string
+  view_count: number
+  application_count: number
+  created_at: string
+  updated_at: string
+}
+
 export const searchService = {
   // Job search functions
   async searchJobs(filters: JobSearchFilters): Promise<SearchResult<any>> {
