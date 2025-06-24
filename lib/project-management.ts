@@ -21,6 +21,24 @@ export interface Project {
   total_hours_logged: number
   created_at: string
   updated_at: string
+  hirer?: {
+    id: string
+    first_name?: string
+    last_name?: string
+    company_name?: string
+    avatar_url?: string
+  }
+  professional?: {
+    id: string
+    first_name?: string
+    last_name?: string
+    avatar_url?: string
+  }
+  job?: {
+    title: string
+    description: string
+  }
+  milestones?: ProjectMilestone[]
 }
 
 export interface ProjectMilestone {
@@ -54,6 +72,12 @@ export interface TimeEntry {
   is_approved: boolean
   created_at: string
   updated_at: string
+  project?: {
+    title: string
+  }
+  milestone?: {
+    title: string
+  }
 }
 
 export interface ProjectUpdate {
@@ -68,6 +92,16 @@ export interface ProjectUpdate {
   is_important: boolean
   created_at: string
   updated_at: string
+  author?: {
+    id: string
+    first_name?: string
+    last_name?: string
+    company_name?: string
+    avatar_url?: string
+  }
+  milestone?: {
+    title: string
+  }
 }
 
 export interface ProjectFile {
@@ -86,6 +120,15 @@ export interface ProjectFile {
   download_count: number
   created_at: string
   updated_at: string
+  uploader?: {
+    id: string
+    first_name?: string
+    last_name?: string
+    company_name?: string
+  }
+  milestone?: {
+    title: string
+  }
 }
 
 export interface MilestonePayment {
