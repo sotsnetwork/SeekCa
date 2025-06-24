@@ -177,7 +177,7 @@ export default function BrowsePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Skills</SelectItem>
-                  <SelectItem value="electrical">Electrical Engineering</SelectItem>
+                  <SelectItem value="electrical">Electrician</SelectItem>
                   <SelectItem value="plumbing">Plumbing</SelectItem>
                   <SelectItem value="hvac">HVAC</SelectItem>
                   <SelectItem value="carpentry">Carpentry</SelectItem>
@@ -185,7 +185,10 @@ export default function BrowsePage() {
                   <SelectItem value="painting">Painting</SelectItem>
                   <SelectItem value="tiling">Tiling</SelectItem>
                   <SelectItem value="roofing">Roofing</SelectItem>
-                  <SelectItem value="welding">Welding</SelectItem>
+                  <SelectItem value="welding">Welding & Fabrication</SelectItem>
+                  <SelectItem value="metal-fabrication">Metal Fabrication</SelectItem>
+                  <SelectItem value="structural-welding">Structural Welding</SelectItem>
+                  <SelectItem value="pipe-welding">Pipe Welding</SelectItem>
                   <SelectItem value="architecture">Architecture</SelectItem>
                   <SelectItem value="surveying">Surveying</SelectItem>
                   <SelectItem value="interior-design">Interior Design</SelectItem>
