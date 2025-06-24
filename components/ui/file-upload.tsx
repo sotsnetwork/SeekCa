@@ -2,27 +2,17 @@
 
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Upload, 
-  File, 
-  Image, 
-  FileText, 
-  X, 
-  Download, 
-  Eye,
-  AlertTriangle,
-  CheckCircle
-} from 'lucide-react'
+import { Upload, X, File, Image, FileText, Download } from 'lucide-react'
 import { fileUpload, UploadedFile, FileUploadError } from '@/lib/file-upload'
+import { cn } from '@/lib/utils'
 
 interface FileUploadProps {
   userId: string
   folder?: string
   maxFiles?: number
-  maxSize?: number // in MB
+  maxSize?: number
   allowedTypes?: string[]
   onFileUploaded?: (file: UploadedFile) => void
   onFileRemoved?: (fileId: string) => void
@@ -40,257 +30,179 @@ export function FileUpload({
   userId,
   folder = 'general',
   maxFiles = 5,
-  maxSize = 10,
+  maxSize = 10 * 1024 * 1024, // 10MB
   allowedTypes,
   onFileUploaded,
   onFileRemoved,
-  className = ''
+  className
 }: FileUploadProps) {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [error, setError] = useState('')
-  const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFiles = async (files: FileList) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    if (files.length === 0) return
+
+    // Check file count limit
     if (uploadedFiles.length + files.length > maxFiles) {
       setError(`Maximum ${maxFiles} files allowed`)
       return
     }
 
-    setError('')
     setUploading(true)
-    setUploadProgress(0)
+    setError('')
 
     try {
-      const uploadPromises = Array.from(files).map(async (file, index) => {
-        try {
-          const uploadedFile = await fileUpload.uploadFile(file, userId, {
-            folder,
-            maxSize: maxSize * 1024 * 1024,
-            allowedTypes
-          })
-          
-          setUploadProgress(((index + 1) / files.length) * 100)
-          return uploadedFile
-        } catch (error) {
-          if (error instanceof FileUploadError) {
-            throw new Error(`${file.name}: ${error.message}`)
-          }
-          throw error
-        }
-      })
-
-      const results = await Promise.all(uploadPromises)
-      
-      setUploadedFiles(prev => [...prev, ...results])
-      results.forEach(file => onFileUploaded?.(file))
-      
-    } catch (error: any) {
-      setError(error.message || 'Upload failed')
+      for (const file of files) {
+        const uploadedFile = await fileUpload.uploadFile(file, userId, {
+          folder,
+          maxSize,
+          allowedTypes
+        })
+        
+        setUploadedFiles(prev => [...prev, uploadedFile])
+        onFileUploaded?.(uploadedFile)
+      }
+    } catch (error) {
+      if (error instanceof FileUploadError) {
+        setError(error.message)
+      } else {
+        setError('Upload failed. Please try again.')
+      }
     } finally {
       setUploading(false)
-      setUploadProgress(0)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragActive(false)
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files)
+  const handleRemoveFile = async (fileId: string) => {
+    try {
+      await fileUpload.deleteFile(fileId)
+      setUploadedFiles(prev => prev.filter(f => f.id !== fileId))
+      onFileRemoved?.(fileId)
+    } catch (error) {
+      setError('Failed to remove file')
     }
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragActive(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragActive(false)
-  }
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFiles(e.target.files)
-    }
-  }
-
-  const removeFile = (fileId: string) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== fileId))
-    onFileRemoved?.(fileId)
   }
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) {
-      return <Image className="h-4 w-4" />
-    } else if (fileType === 'application/pdf' || fileType.includes('document')) {
-      return <FileText className="h-4 w-4" />
-    }
+    if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />
+    if (fileType === 'application/pdf') return <FileText className="h-4 w-4" />
     return <File className="h-4 w-4" />
   }
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={cn("space-y-4", className)}>
       {/* Upload Area */}
-      <div
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-          dragActive
-            ? 'border-blue-400 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
-        } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-      >
-        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-        <p className="text-sm text-gray-600 mb-2">
-          Drag and drop files here, or{' '}
-          <button
-            type="button"
-            className="text-blue-600 hover:text-blue-700 underline"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            browse
-          </button>
-        </p>
-        <p className="text-xs text-gray-500">
-          Maximum {maxFiles} files, up to {maxSize}MB each
-        </p>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={handleFileSelect}
-          accept={allowedTypes?.join(',')}
-        />
-      </div>
-
-      {/* Upload Progress */}
-      {uploading && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span>Uploading files...</span>
-            <span>{Math.round(uploadProgress)}%</span>
+      <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Drop files here or click to upload
+              </p>
+              <p className="text-xs text-gray-500">
+                Max {maxFiles} files, {fileUpload.formatFileSize(maxSize)} each
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || uploadedFiles.length >= maxFiles}
+            >
+              {uploading ? 'Uploading...' : 'Choose Files'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect}
+              accept={allowedTypes?.join(',')}
+            />
           </div>
-          <Progress value={uploadProgress} className="h-2" />
-        </div>
-      )}
+        </CardContent>
+      </Card>
 
-      {/* Error Message */}
+      {/* Error Display */}
       {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          {error}
+        </div>
       )}
 
       {/* Uploaded Files */}
       {uploadedFiles.length > 0 && (
         <FileDisplay
           files={uploadedFiles}
-          onRemove={removeFile}
+          onRemove={handleRemoveFile}
+          className="mt-4"
         />
       )}
     </div>
   )
 }
 
-export function FileDisplay({ 
-  files, 
-  onDownload, 
-  onRemove, 
-  className = '' 
-}: FileDisplayProps) {
+export function FileDisplay({ files, onDownload, onRemove, className }: FileDisplayProps) {
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) {
-      return <Image className="h-4 w-4 text-blue-600" />
-    } else if (fileType === 'application/pdf') {
-      return <FileText className="h-4 w-4 text-red-600" />
-    } else if (fileType.includes('document') || fileType.includes('word')) {
-      return <FileText className="h-4 w-4 text-blue-600" />
-    } else if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
-      return <FileText className="h-4 w-4 text-green-600" />
-    }
-    return <File className="h-4 w-4 text-gray-600" />
+    if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />
+    if (fileType === 'application/pdf') return <FileText className="h-4 w-4" />
+    return <File className="h-4 w-4" />
   }
 
-  const formatFileSize = (bytes: number) => {
-    return fileUpload.formatFileSize(bytes)
-  }
-
-  const handleDownload = async (file: UploadedFile) => {
-    try {
-      await fileUpload.downloadFile(file.id)
-      window.open(file.file_url, '_blank')
-      onDownload?.(file)
-    } catch (error) {
-      console.error('Error downloading file:', error)
-    }
-  }
+  if (files.length === 0) return null
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <h4 className="text-sm font-medium text-gray-900">
-        Attached Files ({files.length})
-      </h4>
-      <div className="space-y-2">
-        {files.map((file) => (
-          <div
-            key={file.id}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-          >
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              {getFileIcon(file.file_type)}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {file.file_name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {formatFileSize(file.file_size)}
-                </p>
-              </div>
+    <div className={cn("space-y-2", className)}>
+      {files.map((file) => (
+        <div
+          key={file.id}
+          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+        >
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
+            {getFileIcon(file.file_type)}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {file.file_name}
+              </p>
+              <p className="text-xs text-gray-500">
+                {fileUpload.formatFileSize(file.file_size)}
+              </p>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              {onDownload && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDownload(file)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Download className="h-3 w-3" />
-                </Button>
-              )}
+          </div>
+          <div className="flex items-center space-x-2">
+            {onDownload && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => window.open(file.file_url, '_blank')}
-                className="h-8 w-8 p-0"
+                onClick={() => {
+                  onDownload(file)
+                  fileUpload.downloadFile(file.id)
+                }}
               >
-                <Eye className="h-3 w-3" />
+                <Download className="h-4 w-4" />
               </Button>
-              {onRemove && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRemove(file.id)}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
+            )}
+            {onRemove && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(file.id)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   )
 }

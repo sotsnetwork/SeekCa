@@ -4,20 +4,17 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import { 
-  Heart, 
   Search, 
   Bell, 
-  Trash2, 
-  Edit, 
+  BellOff, 
+  Trash, 
+  Clock, 
+  Calendar, 
   Play,
-  Clock,
-  MapPin,
-  DollarSign,
-  Star
+  Edit
 } from 'lucide-react'
-import { searchService } from '@/lib/search'
+import { searchService, SavedSearch } from '@/lib/search'
 
 interface SavedSearchesProps {
   userId: string
@@ -25,225 +22,256 @@ interface SavedSearchesProps {
 }
 
 export function SavedSearches({ userId, onSearchExecute }: SavedSearchesProps) {
-  const [savedSearches, setSavedSearches] = useState<any[]>([])
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    loadSavedSearches()
+    const fetchSavedSearches = async () => {
+      try {
+        const searches = await searchService.getSavedSearches(userId)
+        setSavedSearches(searches)
+      } catch (error) {
+        console.error('Error fetching saved searches:', error)
+        setError('Failed to load saved searches')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSavedSearches()
   }, [userId])
 
-  const loadSavedSearches = async () => {
+  const handleToggleAlert = async (searchId: string, enableAlert: boolean) => {
     try {
-      setLoading(true)
-      const searches = await searchService.getSavedSearches(userId)
-      setSavedSearches(searches)
-    } catch (error) {
-      console.error('Error loading saved searches:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const toggleAlert = async (searchId: string, enabled: boolean) => {
-    try {
-      await searchService.updateSavedSearch(searchId, { is_alert_enabled: enabled })
+      const updatedSearch = await searchService.updateSavedSearch(searchId, {
+        is_alert_enabled: enableAlert
+      })
+      
       setSavedSearches(prev => 
         prev.map(search => 
-          search.id === searchId 
-            ? { ...search, is_alert_enabled: enabled }
-            : search
+          search.id === searchId ? updatedSearch : search
         )
       )
     } catch (error) {
-      console.error('Error updating search alert:', error)
+      console.error('Error updating saved search:', error)
     }
   }
 
-  const deleteSearch = async (searchId: string) => {
+  const handleDeleteSearch = async (searchId: string) => {
     try {
       await searchService.deleteSavedSearch(searchId)
       setSavedSearches(prev => prev.filter(search => search.id !== searchId))
     } catch (error) {
-      console.error('Error deleting search:', error)
+      console.error('Error deleting saved search:', error)
     }
   }
 
-  const executeSearch = (search: any) => {
-    onSearchExecute(search.criteria, search.search_type)
+  const formatAlertFrequency = (frequency: string) => {
+    switch (frequency) {
+      case 'immediate': return 'Real-time'
+      case 'daily': return 'Daily'
+      case 'weekly': return 'Weekly'
+      default: return frequency
+    }
   }
 
   const formatSearchCriteria = (criteria: any, searchType: string) => {
     const parts = []
     
-    if (criteria.query) {
-      parts.push(`"${criteria.query}"`)
-    }
-    
-    if (criteria.location) {
-      parts.push(`📍 ${criteria.location}`)
-    }
-    
-    if (criteria.skills && criteria.skills.length > 0) {
-      parts.push(`🔧 ${criteria.skills.slice(0, 2).join(', ')}${criteria.skills.length > 2 ? '...' : ''}`)
-    }
-    
     if (searchType === 'jobs') {
-      if (criteria.category) {
-        parts.push(`📂 ${criteria.category}`)
-      }
-      if (criteria.salaryMin || criteria.salaryMax) {
-        const min = criteria.salaryMin || 0
-        const max = criteria.salaryMax || '∞'
-        parts.push(`💰 $${min}-${max}${criteria.salaryType === 'hourly' ? '/hr' : '/yr'}`)
-      }
-      if (criteria.remoteAllowed) {
-        parts.push(`🏠 Remote`)
-      }
-      if (criteria.isUrgent) {
-        parts.push(`⚡ Urgent`)
-      }
+      if (criteria.query) parts.push(`"${criteria.query}"`)
+      if (criteria.category) parts.push(criteria.category)
+      if (criteria.jobType) parts.push(criteria.jobType.replace('-', ' '))
+      if (criteria.location) parts.push(criteria.location)
+      if (criteria.remoteAllowed) parts.push('Remote')
+      if (criteria.salaryMin) parts.push(`$${criteria.salaryMin}+`)
+      if (criteria.requiredSkills?.length) parts.push(`${criteria.requiredSkills.length} skills`)
     } else {
-      if (criteria.hourlyRateMin || criteria.hourlyRateMax) {
-        const min = criteria.hourlyRateMin || 0
-        const max = criteria.hourlyRateMax || '∞'
-        parts.push(`💰 $${min}-${max}/hr`)
-      }
-      if (criteria.experienceMin) {
-        parts.push(`📅 ${criteria.experienceMin}+ years`)
-      }
-      if (criteria.ratingMin) {
-        parts.push(`⭐ ${criteria.ratingMin}+ stars`)
-      }
-      if (criteria.availabilityStatus) {
-        parts.push(`🟢 ${criteria.availabilityStatus}`)
-      }
+      if (criteria.query) parts.push(`"${criteria.query}"`)
+      if (criteria.skills?.length) parts.push(`${criteria.skills.length} skills`)
+      if (criteria.location) parts.push(criteria.location)
+      if (criteria.hourlyRateMin) parts.push(`$${criteria.hourlyRateMin}+/hr`)
+      if (criteria.availabilityStatus) parts.push(criteria.availabilityStatus)
+      if (criteria.experienceMin) parts.push(`${criteria.experienceMin}+ years`)
+      if (criteria.ratingMin) parts.push(`${criteria.ratingMin}+ stars`)
     }
     
-    return parts.length > 0 ? parts.join(' • ') : 'No specific criteria'
-  }
-
-  const getSearchTypeIcon = (searchType: string) => {
-    return searchType === 'jobs' ? '💼' : '👥'
-  }
-
-  const getSearchTypeColor = (searchType: string) => {
-    return searchType === 'jobs' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+    return parts.length > 0 ? parts.join(' • ') : 'No filters'
   }
 
   if (loading) {
     return (
+      <div className="text-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading saved searches...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
+  if (savedSearches.length === 0) {
+    return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Heart className="mr-2 h-5 w-5 text-red-500" />
-            Saved Searches
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="p-12 text-center">
+          <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No saved searches</h3>
+          <p className="text-gray-600 mb-4">
+            Save your searches to quickly access them later or set up alerts for new matches
+          </p>
+          <p className="text-sm text-gray-500">
+            Use the search tab to create and save your first search
+          </p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Heart className="mr-2 h-5 w-5 text-red-500" />
-          Saved Searches
-        </CardTitle>
-        <CardDescription>
-          Quickly access your saved searches and manage alerts
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {savedSearches.length === 0 ? (
-          <div className="text-center py-8">
-            <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No saved searches</h3>
-            <p className="text-gray-600">
-              Save your searches to quickly access them later and get alerts for new matches
-            </p>
-          </div>
-        ) : (
+    <div className="space-y-6">
+      {/* Job Searches */}
+      {savedSearches.filter(s => s.search_type === 'jobs').length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Job Searches</h3>
           <div className="space-y-4">
-            {savedSearches.map((search) => (
-              <div
-                key={search.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-medium text-gray-900">{search.name}</h3>
-                      <Badge className={getSearchTypeColor(search.search_type)}>
-                        {getSearchTypeIcon(search.search_type)} {search.search_type}
-                      </Badge>
+            {savedSearches
+              .filter(search => search.search_type === 'jobs')
+              .map((search) => (
+                <Card key={search.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className="font-medium text-gray-900">{search.name}</h4>
+                          {search.is_alert_enabled && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                              <Bell className="h-3 w-3 mr-1" />
+                              {formatAlertFrequency(search.alert_frequency)}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {formatSearchCriteria(search.criteria, 'jobs')}
+                        </p>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>
+                            Last updated: {new Date(search.updated_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleToggleAlert(search.id, !search.is_alert_enabled)}
+                        >
+                          {search.is_alert_enabled ? (
+                            <BellOff className="h-4 w-4" />
+                          ) : (
+                            <Bell className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => onSearchExecute(search.criteria, 'jobs')}
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteSearch(search.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {formatSearchCriteria(search.criteria, search.search_type)}
-                    </p>
-                    <div className="flex items-center text-xs text-gray-500 space-x-4">
-                      <span className="flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Created {new Date(search.created_at).toLocaleDateString()}
-                      </span>
-                      {search.last_alert_sent && (
-                        <span className="flex items-center">
-                          <Bell className="h-3 w-3 mr-1" />
-                          Last alert {new Date(search.last_alert_sent).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => executeSearch(search)}
-                      className="flex items-center"
-                    >
-                      <Play className="h-3 w-3 mr-1" />
-                      Run
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteSearch(search.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Alert Settings */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex items-center space-x-2">
-                    <Bell className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">Email alerts</span>
-                    <Badge variant="outline" className="text-xs">
-                      {search.alert_frequency}
-                    </Badge>
-                  </div>
-                  <Switch
-                    checked={search.is_alert_enabled}
-                    onCheckedChange={(enabled) => toggleAlert(search.id, enabled)}
-                  />
-                </div>
-              </div>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+
+      {/* Professional Searches */}
+      {savedSearches.filter(s => s.search_type === 'professionals').length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Professional Searches</h3>
+          <div className="space-y-4">
+            {savedSearches
+              .filter(search => search.search_type === 'professionals')
+              .map((search) => (
+                <Card key={search.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className="font-medium text-gray-900">{search.name}</h4>
+                          {search.is_alert_enabled && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                              <Bell className="h-3 w-3 mr-1" />
+                              {formatAlertFrequency(search.alert_frequency)}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {formatSearchCriteria(search.criteria, 'professionals')}
+                        </p>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>
+                            Created: {new Date(search.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleToggleAlert(search.id, !search.is_alert_enabled)}
+                        >
+                          {search.is_alert_enabled ? (
+                            <BellOff className="h-4 w-4" />
+                          ) : (
+                            <Bell className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => onSearchExecute(search.criteria, 'professionals')}
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteSearch(search.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

@@ -1,468 +1,582 @@
-'use client'
+import { supabase } from './supabase'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { FileUpload, FileDisplay } from '@/components/ui/file-upload'
-import { 
-  MessageSquare, 
-  Send, 
-  Search, 
-  Phone, 
-  Video,
-  MoreVertical,
-  Paperclip,
-  Smile,
-  Clock,
-  CheckCheck,
-  X
-} from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { messageQueries } from '@/lib/database'
-import { fileUpload, UploadedFile } from '@/lib/file-upload'
+export interface JobSearchFilters {
+  query?: string
+  category?: string
+  jobType?: string
+  location?: string
+  remoteAllowed?: boolean
+  salaryMin?: number
+  salaryMax?: number
+  salaryType?: string
+  requiredSkills?: string[]
+  requiredLicenses?: string[]
+  isUrgent?: boolean
+  postedWithinDays?: number
+  limit?: number
+  offset?: number
+}
 
-export default function MessagesPage() {
-  const router = useRouter()
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
-  const [conversations, setConversations] = useState<any[]>([])
-  const [selectedConversation, setSelectedConversation] = useState<any>(null)
-  const [messages, setMessages] = useState<any[]>([])
-  const [newMessage, setNewMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showFileUpload, setShowFileUpload] = useState(false)
-  const [messageFiles, setMessageFiles] = useState<{[key: string]: UploadedFile[]}>({})
+export interface ProfessionalSearchFilters {
+  query?: string
+  skills?: string[]
+  location?: string
+  hourlyRateMin?: number
+  hourlyRateMax?: number
+  availabilityStatus?: string
+  experienceMin?: number
+  ratingMin?: number
+  licenses?: string[]
+  limit?: number
+  offset?: number
+}
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          router.push('/auth/login')
-          return
+export interface SavedSearch {
+  id: string
+  user_id: string
+  name: string
+  search_type: 'jobs' | 'professionals'
+  criteria: any
+  is_alert_enabled: boolean
+  alert_frequency: 'immediate' | 'daily' | 'weekly'
+  last_alert_sent?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface JobAlert {
+  id: string
+  user_id: string
+  saved_search_id: string
+  job_id: string
+  is_sent: boolean
+  sent_at?: string
+  created_at: string
+}
+
+export interface SearchResult<T> {
+  data: T[]
+  total: number
+  hasMore: boolean
+}
+
+// Job queries
+export const jobQueries = {
+  async getJobById(jobId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select(`
+        *,
+        profiles:hirer_id (
+          id,
+          first_name,
+          last_name,
+          company_name,
+          avatar_url,
+          bio,
+          location,
+          is_verified
+        )
+      `)
+      .eq('id', jobId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async getJobsByHirer(hirerId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('hirer_id', hirerId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createJob(jobData: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert(jobData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateJob(jobId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .update(updates)
+      .eq('id', jobId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteJob(jobId: string) {
+    const { error } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('id', jobId)
+
+    if (error) throw error
+  }
+}
+
+// Application queries
+export const applicationQueries = {
+  async getApplicationsByJob(jobId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        profiles:professional_id (
+          id,
+          first_name,
+          last_name,
+          avatar_url,
+          is_verified
+        ),
+        professional_profiles:professional_id (
+          title,
+          hourly_rate,
+          rating,
+          total_reviews,
+          skills
+        )
+      `)
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getApplicationsByProfessional(professionalId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        jobs (
+          id,
+          title,
+          status,
+          salary_min,
+          salary_max,
+          salary_type,
+          company_name:profiles!jobs_hirer_id_fkey(company_name)
+        )
+      `)
+      .eq('professional_id', professionalId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createApplication(applicationData: any) {
+    const { data, error } = await supabase
+      .from('applications')
+      .insert(applicationData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateApplicationStatus(applicationId: string, status: string, notes?: string) {
+    const updates: any = { status }
+    if (notes) updates.hirer_notes = notes
+
+    const { data, error } = await supabase
+      .from('applications')
+      .update(updates)
+      .eq('id', applicationId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteApplication(applicationId: string) {
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', applicationId)
+
+    if (error) throw error
+  }
+}
+
+// Professional profile queries
+export const professionalQueries = {
+  async getProfessionalProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .select(`
+        *,
+        profiles (
+          id,
+          first_name,
+          last_name,
+          email,
+          location,
+          avatar_url,
+          bio,
+          website,
+          linkedin_url,
+          is_verified,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async createProfessionalProfile(profileData: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .insert(profileData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateProfessionalProfile(userId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+}
+
+export interface Job {
+  id: string
+  hirer_id: string
+  title: string
+  description: string
+  category: string
+  job_type: string
+  location?: string
+  remote_allowed: boolean
+  salary_type: string
+  salary_min?: number
+  salary_max?: number
+  required_skills: string[]
+  required_licenses: string[]
+  requirements: string[]
+  is_urgent: boolean
+  status: string
+  view_count: number
+  application_count: number
+  created_at: string
+  updated_at: string
+}
+
+export const searchService = {
+  // Job search functions
+  async searchJobs(filters: JobSearchFilters): Promise<SearchResult<any>> {
+    const { data, error } = await supabase.rpc('search_jobs', {
+      p_search_type: 'jobs',
+      p_query: filters.query || null,
+      p_category: filters.category || null,
+      p_job_type: filters.jobType || null,
+      p_location: filters.location || null,
+      p_remote_allowed: filters.remoteAllowed || null,
+      p_salary_min: filters.salaryMin || null,
+      p_salary_max: filters.salaryMax || null,
+      p_salary_type: filters.salaryType || null,
+      p_required_skills: filters.requiredSkills || null,
+      p_required_licenses: filters.requiredLicenses || null,
+      p_is_urgent: filters.isUrgent || null,
+      p_posted_within_days: filters.postedWithinDays || null,
+      p_limit: filters.limit || 50,
+      p_offset: filters.offset || 0
+    })
+
+    if (error) throw error
+
+    return {
+      data: data || [],
+      total: data?.length || 0,
+      hasMore: (data?.length || 0) === (filters.limit || 50)
+    }
+  },
+
+  // Professional search functions
+  async searchProfessionals(filters: ProfessionalSearchFilters): Promise<SearchResult<any>> {
+    const { data, error } = await supabase.rpc('search_professionals', {
+      p_search_type: 'professionals',
+      p_query: filters.query || null,
+      p_skills: filters.skills || null,
+      p_location: filters.location || null,
+      p_hourly_rate_min: filters.hourlyRateMin || null,
+      p_hourly_rate_max: filters.hourlyRateMax || null,
+      p_availability_status: filters.availabilityStatus || null,
+      p_experience_min: filters.experienceMin || null,
+      p_rating_min: filters.ratingMin || null,
+      p_licenses: filters.licenses || null,
+      p_limit: filters.limit || 50,
+      p_offset: filters.offset || 0
+    })
+
+    if (error) throw error
+
+    return {
+      data: data || [],
+      total: data?.length || 0,
+      hasMore: (data?.length || 0) === (filters.limit || 50)
+    }
+  },
+
+  // Saved search functions
+  async getSavedSearches(userId: string): Promise<SavedSearch[]> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createSavedSearch(
+    userId: string,
+    name: string,
+    searchType: 'jobs' | 'professionals',
+    criteria: any,
+    enableAlert = false,
+    alertFrequency: 'immediate' | 'daily' | 'weekly' = 'daily'
+  ): Promise<SavedSearch> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .insert({
+        user_id: userId,
+        name,
+        search_type: searchType,
+        criteria,
+        is_alert_enabled: enableAlert,
+        alert_frequency: alertFrequency
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateSavedSearch(
+    searchId: string,
+    updates: Partial<SavedSearch>
+  ): Promise<SavedSearch> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .update(updates)
+      .eq('id', searchId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteSavedSearch(searchId: string): Promise<void> {
+    const { error } = await supabase
+      .from('saved_searches')
+      .delete()
+      .eq('id', searchId)
+
+    if (error) throw error
+  },
+
+  // Job alert functions
+  async getJobAlerts(userId: string): Promise<JobAlert[]> {
+    const { data, error } = await supabase
+      .from('job_alerts')
+      .select(`
+        *,
+        saved_searches (name, criteria),
+        jobs (title, company_name:profiles!jobs_hirer_id_fkey(company_name))
+      `)
+      .eq('user_id', userId)
+      .eq('is_sent', false)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async markJobAlertAsSent(alertId: string): Promise<void> {
+    const { error } = await supabase
+      .from('job_alerts')
+      .update({ is_sent: true, sent_at: new Date().toISOString() })
+      .eq('id', alertId)
+
+    if (error) throw error
+  },
+
+  // Analytics functions
+  async logSearch(
+    userId: string,
+    searchType: 'jobs' | 'professionals',
+    query: string,
+    filters: any,
+    resultsCount: number,
+    sessionId?: string
+  ): Promise<void> {
+    const { error } = await supabase.rpc('log_search_analytics', {
+      p_user_id: userId,
+      p_search_type: searchType,
+      p_query: query,
+      p_filters: filters,
+      p_results_count: resultsCount,
+      p_session_id: sessionId
+    })
+
+    if (error) console.error('Failed to log search analytics:', error)
+  },
+
+  async getPopularSearches(searchType: 'jobs' | 'professionals', limit = 10): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('search_analytics')
+      .select('query, count(*)')
+      .eq('search_type', searchType)
+      .not('query', 'is', null)
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
+      .order('count', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    return data || []
+  },
+
+  // Suggestion functions
+  async getSkillSuggestions(query: string, limit = 10): Promise<string[]> {
+    const { data: jobSkills, error: jobError } = await supabase
+      .from('jobs')
+      .select('required_skills')
+      .not('required_skills', 'is', null)
+
+    const { data: profSkills, error: profError } = await supabase
+      .from('professional_profiles')
+      .select('skills')
+      .not('skills', 'is', null)
+
+    if (jobError || profError) return []
+
+    // Combine and deduplicate skills
+    const allSkills = new Set<string>()
+    
+    jobSkills?.forEach(job => {
+      job.required_skills?.forEach((skill: string) => allSkills.add(skill))
+    })
+    
+    profSkills?.forEach(prof => {
+      prof.skills?.forEach((skill: string) => allSkills.add(skill))
+    })
+
+    // Filter by query and return top matches
+    const filteredSkills = Array.from(allSkills)
+      .filter(skill => skill.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, limit)
+
+    return filteredSkills
+  },
+
+  async getLocationSuggestions(query: string, limit = 10): Promise<string[]> {
+    const { data: jobLocations, error: jobError } = await supabase
+      .from('jobs')
+      .select('location')
+      .not('location', 'is', null)
+      .ilike('location', `%${query}%`)
+      .limit(limit)
+
+    const { data: profLocations, error: profError } = await supabase
+      .from('profiles')
+      .select('location')
+      .not('location', 'is', null)
+      .ilike('location', `%${query}%`)
+      .limit(limit)
+
+    if (jobError || profError) return []
+
+    // Combine and deduplicate locations
+    const allLocations = new Set<string>()
+    
+    jobLocations?.forEach(job => {
+      if (job.location) allLocations.add(job.location)
+    })
+    
+    profLocations?.forEach(prof => {
+      if (prof.location) allLocations.add(prof.location)
+    })
+
+    return Array.from(allLocations).slice(0, limit)
+  },
+
+  // Filter utilities
+  buildJobFiltersFromUrl(searchParams: URLSearchParams): JobSearchFilters {
+    return {
+      query: searchParams.get('q') || undefined,
+      category: searchParams.get('category') || undefined,
+      jobType: searchParams.get('type') || undefined,
+      location: searchParams.get('location') || undefined,
+      remoteAllowed: searchParams.get('remote') === 'true' || undefined,
+      salaryMin: searchParams.get('salary_min') ? Number(searchParams.get('salary_min')) : undefined,
+      salaryMax: searchParams.get('salary_max') ? Number(searchParams.get('salary_max')) : undefined,
+      salaryType: searchParams.get('salary_type') || undefined,
+      requiredSkills: searchParams.get('skills')?.split(',') || undefined,
+      isUrgent: searchParams.get('urgent') === 'true' || undefined,
+      postedWithinDays: searchParams.get('posted_within') ? Number(searchParams.get('posted_within')) : undefined
+    }
+  },
+
+  buildProfessionalFiltersFromUrl(searchParams: URLSearchParams): ProfessionalSearchFilters {
+    return {
+      query: searchParams.get('q') || undefined,
+      skills: searchParams.get('skills')?.split(',') || undefined,
+      location: searchParams.get('location') || undefined,
+      hourlyRateMin: searchParams.get('rate_min') ? Number(searchParams.get('rate_min')) : undefined,
+      hourlyRateMax: searchParams.get('rate_max') ? Number(searchParams.get('rate_max')) : undefined,
+      availabilityStatus: searchParams.get('availability') || undefined,
+      experienceMin: searchParams.get('experience_min') ? Number(searchParams.get('experience_min')) : undefined,
+      ratingMin: searchParams.get('rating_min') ? Number(searchParams.get('rating_min')) : undefined,
+      licenses: searchParams.get('licenses')?.split(',') || undefined
+    }
+  },
+
+  filtersToUrlParams(filters: JobSearchFilters | ProfessionalSearchFilters): URLSearchParams {
+    const params = new URLSearchParams()
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          params.set(key, value.join(','))
+        } else {
+          params.set(key, String(value))
         }
-
-        setUser(user)
-
-        // Get user profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
-
-        setProfile(profileData)
-
-        // Get conversations
-        const conversationsData = await messageQueries.getConversations(user.id)
-        setConversations(conversationsData)
-
-        // Select first conversation if available
-        if (conversationsData.length > 0) {
-          setSelectedConversation(conversationsData[0])
-          loadMessages(conversationsData[0].id)
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      } finally {
-        setLoading(false)
       }
-    }
-
-    getUser()
-  }, [router])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const loadMessages = async (conversationId: string) => {
-    try {
-      const messagesData = await messageQueries.getMessages(conversationId)
-      setMessages(messagesData)
-      
-      // Load files for each message
-      const filesMap: {[key: string]: UploadedFile[]} = {}
-      for (const message of messagesData) {
-        const files = await fileUpload.getFilesByMessage(message.id)
-        if (files.length > 0) {
-          filesMap[message.id] = files
-        }
-      }
-      setMessageFiles(filesMap)
-      
-      // Mark messages as read
-      await messageQueries.markMessagesAsRead(conversationId, user.id)
-    } catch (error) {
-      console.error('Error loading messages:', error)
-    }
-  }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation || sending) return
-
-    setSending(true)
-    try {
-      const messageData = {
-        conversation_id: selectedConversation.id,
-        sender_id: user.id,
-        content: newMessage.trim(),
-        message_type: 'text'
-      }
-
-      const sentMessage = await messageQueries.sendMessage(messageData)
-      setMessages(prev => [...prev, sentMessage])
-      setNewMessage('')
-      setShowFileUpload(false)
-    } catch (error) {
-      console.error('Error sending message:', error)
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
-
-  const handleFileUploaded = async (file: UploadedFile) => {
-    if (!selectedConversation) return
-
-    try {
-      // Create a message for the file
-      const messageData = {
-        conversation_id: selectedConversation.id,
-        sender_id: user.id,
-        content: `Shared a file: ${file.file_name}`,
-        message_type: 'file'
-      }
-
-      const sentMessage = await messageQueries.sendMessage(messageData)
-      
-      // Attach file to message
-      await fileUpload.attachToMessage(file.id, sentMessage.id)
-      
-      setMessages(prev => [...prev, sentMessage])
-      setMessageFiles(prev => ({
-        ...prev,
-        [sentMessage.id]: [file]
-      }))
-    } catch (error) {
-      console.error('Error sending file:', error)
-    }
-  }
-
-  const getOtherParticipant = (conversation: any) => {
-    if (profile?.role === 'professional') {
-      return conversation.hirer
-    } else {
-      return conversation.professional
-    }
-  }
-
-  const getParticipantName = (participant: any) => {
-    if (participant.first_name && participant.last_name) {
-      return `${participant.first_name} ${participant.last_name}`
-    }
-    return participant.company_name || 'User'
-  }
-
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+    })
     
-    if (diffInMinutes < 1) return 'Just now'
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`
-    
-    const diffInHours = Math.floor(diffInMinutes / 60)
-    if (diffInHours < 24) return `${diffInHours}h ago`
-    
-    const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays}d ago`
-    
-    return date.toLocaleDateString()
+    return params
   }
-
-  const filteredConversations = conversations.filter(conv => {
-    const participant = getOtherParticipant(conv)
-    const name = getParticipantName(participant)
-    return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           conv.job?.title?.toLowerCase().includes(searchQuery.toLowerCase())
-  })
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading messages...</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
-          <div className="flex h-full">
-            {/* Conversations Sidebar */}
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-              {/* Header */}
-              <div className="p-4 border-b border-gray-200">
-                <h1 className="text-xl font-semibold text-gray-900 mb-4">Messages</h1>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search conversations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Conversations List */}
-              <div className="flex-1 overflow-y-auto">
-                {filteredConversations.length === 0 ? (
-                  <div className="p-6 text-center">
-                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <h3 className="font-medium text-gray-900 mb-2">No conversations</h3>
-                    <p className="text-sm text-gray-600">
-                      Start a conversation by applying to jobs or contacting professionals
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-1 p-2">
-                    {filteredConversations.map((conversation) => {
-                      const participant = getOtherParticipant(conversation)
-                      const isSelected = selectedConversation?.id === conversation.id
-                      
-                      return (
-                        <div
-                          key={conversation.id}
-                          className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                            isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'
-                          }`}
-                          onClick={() => {
-                            setSelectedConversation(conversation)
-                            loadMessages(conversation.id)
-                          }}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={participant?.avatar_url} alt={getParticipantName(participant)} />
-                              <AvatarFallback className="bg-blue-100 text-blue-700">
-                                {getParticipantName(participant)[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-900 truncate">
-                                  {getParticipantName(participant)}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {getTimeAgo(conversation.last_message_at)}
-                                </p>
-                              </div>
-                              {conversation.job && (
-                                <p className="text-xs text-blue-600 truncate">
-                                  Re: {conversation.job.title}
-                                </p>
-                              )}
-                              <p className="text-xs text-gray-500 truncate mt-1">
-                                Click to view conversation
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col">
-              {selectedConversation ? (
-                <>
-                  {/* Chat Header */}
-                  <div className="p-4 border-b border-gray-200 bg-white">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage 
-                            src={getOtherParticipant(selectedConversation)?.avatar_url} 
-                            alt={getParticipantName(getOtherParticipant(selectedConversation))} 
-                          />
-                          <AvatarFallback className="bg-blue-100 text-blue-700">
-                            {getParticipantName(getOtherParticipant(selectedConversation))[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h2 className="font-medium text-gray-900">
-                            {getParticipantName(getOtherParticipant(selectedConversation))}
-                          </h2>
-                          {selectedConversation.job && (
-                            <p className="text-sm text-blue-600">
-                              Re: {selectedConversation.job.title}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                          <Phone className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Video className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.map((message) => {
-                      const isOwnMessage = message.sender_id === user.id
-                      const files = messageFiles[message.id] || []
-                      
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            isOwnMessage 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-100 text-gray-900'
-                          }`}>
-                            {message.message_type === 'file' ? (
-                              <div className="space-y-2">
-                                <p className="text-sm">{message.content}</p>
-                                {files.length > 0 && (
-                                  <FileDisplay
-                                    files={files}
-                                    onDownload={(file) => window.open(file.file_url, '_blank')}
-                                    className="mt-2"
-                                  />
-                                )}
-                              </div>
-                            ) : (
-                              <p className="text-sm">{message.content}</p>
-                            )}
-                            <div className={`flex items-center justify-end mt-1 space-x-1 ${
-                              isOwnMessage ? 'text-blue-200' : 'text-gray-500'
-                            }`}>
-                              <span className="text-xs">
-                                {new Date(message.created_at).toLocaleTimeString([], { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </span>
-                              {isOwnMessage && (
-                                <CheckCheck className="h-3 w-3" />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Message Input */}
-                  <div className="p-4 border-t border-gray-200 bg-white">
-                    {/* File Upload Area */}
-                    {showFileUpload && (
-                      <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium">Share Files</h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowFileUpload(false)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <FileUpload
-                          userId={user.id}
-                          folder="messages"
-                          maxFiles={3}
-                          onFileUploaded={handleFileUploaded}
-                          className="max-w-none"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <Paperclip 
-                          className="h-4 w-4" 
-                          onClick={() => setShowFileUpload(!showFileUpload)}
-                        />
-                      </Button>
-                      <div className="flex-1 relative">
-                        <Input
-                          placeholder="Type a message..."
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          disabled={sending}
-                        />
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Smile className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        onClick={handleSendMessage}
-                        disabled={!newMessage.trim() || sending}
-                        size="sm"
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Select a conversation
-                    </h3>
-                    <p className="text-gray-600">
-                      Choose a conversation from the sidebar to start messaging
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
 }

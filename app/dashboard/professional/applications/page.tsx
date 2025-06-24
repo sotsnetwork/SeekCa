@@ -1,290 +1,676 @@
-'use client'
+import { supabase } from './supabase'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  Briefcase, 
-  Clock, 
-  DollarSign,
-  Building,
-  Eye,
-  MessageSquare,
-  Calendar,
-  Filter,
-  Search,
-  ArrowRight
-} from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { applicationQueries } from '@/lib/database'
-import Link from 'next/link'
+export interface JobSearchFilters {
+  query?: string
+  category?: string
+  jobType?: string
+  location?: string
+  remoteAllowed?: boolean
+  salaryMin?: number
+  salaryMax?: number
+  salaryType?: string
+  requiredSkills?: string[]
+  requiredLicenses?: string[]
+  isUrgent?: boolean
+  postedWithinDays?: number
+  limit?: number
+  offset?: number
+}
 
-export default function ApplicationsPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [applications, setApplications] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedStatus, setSelectedStatus] = useState('all')
+export interface ProfessionalSearchFilters {
+  query?: string
+  skills?: string[]
+  location?: string
+  hourlyRateMin?: number
+  hourlyRateMax?: number
+  availabilityStatus?: string
+  experienceMin?: number
+  ratingMin?: number
+  licenses?: string[]
+  limit?: number
+  offset?: number
+}
 
-  useEffect(() => {
-    const getApplications = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          router.push('/auth/login')
-          return
+export interface SavedSearch {
+  id: string
+  user_id: string
+  name: string
+  search_type: 'jobs' | 'professionals'
+  criteria: any
+  is_alert_enabled: boolean
+  alert_frequency: 'immediate' | 'daily' | 'weekly'
+  last_alert_sent?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface JobAlert {
+  id: string
+  user_id: string
+  saved_search_id: string
+  job_id: string
+  is_sent: boolean
+  sent_at?: string
+  created_at: string
+}
+
+export interface SearchResult<T> {
+  data: T[]
+  total: number
+  hasMore: boolean
+}
+
+// Job queries
+export const jobQueries = {
+  async getJobById(jobId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select(`
+        *,
+        profiles:hirer_id (
+          id,
+          first_name,
+          last_name,
+          company_name,
+          avatar_url,
+          bio,
+          location,
+          is_verified
+        )
+      `)
+      .eq('id', jobId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async getJobsByHirer(hirerId: string) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('hirer_id', hirerId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createJob(jobData: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert(jobData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateJob(jobId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .update(updates)
+      .eq('id', jobId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteJob(jobId: string) {
+    const { error } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('id', jobId)
+
+    if (error) throw error
+  }
+}
+
+// Application queries
+export const applicationQueries = {
+  async getApplicationsByJob(jobId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        profiles:professional_id (
+          id,
+          first_name,
+          last_name,
+          avatar_url,
+          is_verified
+        ),
+        professional_profiles:professional_id (
+          title,
+          hourly_rate,
+          rating,
+          total_reviews,
+          skills
+        )
+      `)
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getApplicationsByProfessional(professionalId: string) {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        jobs (
+          id,
+          title,
+          status,
+          salary_min,
+          salary_max,
+          salary_type,
+          hirer_id,
+          company_name:profiles!jobs_hirer_id_fkey(company_name)
+        )
+      `)
+      .eq('professional_id', professionalId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createApplication(applicationData: any) {
+    const { data, error } = await supabase
+      .from('applications')
+      .insert(applicationData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateApplicationStatus(applicationId: string, status: string, notes?: string) {
+    const updates: any = { status }
+    if (notes) updates.hirer_notes = notes
+
+    const { data, error } = await supabase
+      .from('applications')
+      .update(updates)
+      .eq('id', applicationId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteApplication(applicationId: string) {
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', applicationId)
+
+    if (error) throw error
+  }
+}
+
+// Professional profile queries
+export const professionalQueries = {
+  async getProfessionalProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .select(`
+        *,
+        profiles (
+          id,
+          first_name,
+          last_name,
+          email,
+          location,
+          avatar_url,
+          bio,
+          website,
+          linkedin_url,
+          is_verified,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async createProfessionalProfile(profileData: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .insert(profileData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateProfessionalProfile(userId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('professional_profiles')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+}
+
+// Message queries
+export const messageQueries = {
+  async getConversations(userId: string) {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(`
+        *,
+        job:jobs(id, title),
+        hirer:profiles!conversations_hirer_id_fkey(
+          id, first_name, last_name, company_name, avatar_url
+        ),
+        professional:profiles!conversations_professional_id_fkey(
+          id, first_name, last_name, avatar_url
+        )
+      `)
+      .or(`hirer_id.eq.${userId},professional_id.eq.${userId}`)
+      .order('last_message_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async getMessages(conversationId: string) {
+    const { data, error } = await supabase
+      .from('messages')
+      .select(`
+        *,
+        sender:profiles(first_name, last_name, avatar_url)
+      `)
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async sendMessage(messageData: any) {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(messageData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async markMessagesAsRead(conversationId: string, userId: string) {
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', userId)
+      .eq('is_read', false)
+
+    if (error) throw error
+  },
+
+  async createConversation(jobId: string, hirerId: string, professionalId: string) {
+    // Check if conversation already exists
+    const { data: existing, error: existingError } = await supabase
+      .from('conversations')
+      .select('*')
+      .eq('job_id', jobId)
+      .eq('hirer_id', hirerId)
+      .eq('professional_id', professionalId)
+      .single()
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      throw existingError
+    }
+
+    if (existing) {
+      return existing
+    }
+
+    // Create new conversation
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({
+        job_id: jobId,
+        hirer_id: hirerId,
+        professional_id: professionalId,
+        last_message_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+}
+
+export interface Job {
+  id: string
+  hirer_id: string
+  title: string
+  description: string
+  category: string
+  job_type: string
+  location?: string
+  remote_allowed: boolean
+  salary_type: string
+  salary_min?: number
+  salary_max?: number
+  required_skills: string[]
+  required_licenses: string[]
+  requirements: string[]
+  is_urgent: boolean
+  status: string
+  view_count: number
+  application_count: number
+  created_at: string
+  updated_at: string
+}
+
+export const searchService = {
+  // Job search functions
+  async searchJobs(filters: JobSearchFilters): Promise<SearchResult<any>> {
+    const { data, error } = await supabase.rpc('search_jobs', {
+      p_search_type: 'jobs',
+      p_query: filters.query || null,
+      p_category: filters.category || null,
+      p_job_type: filters.jobType || null,
+      p_location: filters.location || null,
+      p_remote_allowed: filters.remoteAllowed || null,
+      p_salary_min: filters.salaryMin || null,
+      p_salary_max: filters.salaryMax || null,
+      p_salary_type: filters.salaryType || null,
+      p_required_skills: filters.requiredSkills || null,
+      p_required_licenses: filters.requiredLicenses || null,
+      p_is_urgent: filters.isUrgent || null,
+      p_posted_within_days: filters.postedWithinDays || null,
+      p_limit: filters.limit || 50,
+      p_offset: filters.offset || 0
+    })
+
+    if (error) throw error
+
+    return {
+      data: data || [],
+      total: data?.length || 0,
+      hasMore: (data?.length || 0) === (filters.limit || 50)
+    }
+  },
+
+  // Professional search functions
+  async searchProfessionals(filters: ProfessionalSearchFilters): Promise<SearchResult<any>> {
+    const { data, error } = await supabase.rpc('search_professionals', {
+      p_search_type: 'professionals',
+      p_query: filters.query || null,
+      p_skills: filters.skills || null,
+      p_location: filters.location || null,
+      p_hourly_rate_min: filters.hourlyRateMin || null,
+      p_hourly_rate_max: filters.hourlyRateMax || null,
+      p_availability_status: filters.availabilityStatus || null,
+      p_experience_min: filters.experienceMin || null,
+      p_rating_min: filters.ratingMin || null,
+      p_licenses: filters.licenses || null,
+      p_limit: filters.limit || 50,
+      p_offset: filters.offset || 0
+    })
+
+    if (error) throw error
+
+    return {
+      data: data || [],
+      total: data?.length || 0,
+      hasMore: (data?.length || 0) === (filters.limit || 50)
+    }
+  },
+
+  // Saved search functions
+  async getSavedSearches(userId: string): Promise<SavedSearch[]> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async createSavedSearch(
+    userId: string,
+    name: string,
+    searchType: 'jobs' | 'professionals',
+    criteria: any,
+    enableAlert = false,
+    alertFrequency: 'immediate' | 'daily' | 'weekly' = 'daily'
+  ): Promise<SavedSearch> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .insert({
+        user_id: userId,
+        name,
+        search_type: searchType,
+        criteria,
+        is_alert_enabled: enableAlert,
+        alert_frequency: alertFrequency
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateSavedSearch(
+    searchId: string,
+    updates: Partial<SavedSearch>
+  ): Promise<SavedSearch> {
+    const { data, error } = await supabase
+      .from('saved_searches')
+      .update(updates)
+      .eq('id', searchId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteSavedSearch(searchId: string): Promise<void> {
+    const { error } = await supabase
+      .from('saved_searches')
+      .delete()
+      .eq('id', searchId)
+
+    if (error) throw error
+  },
+
+  // Job alert functions
+  async getJobAlerts(userId: string): Promise<JobAlert[]> {
+    const { data, error } = await supabase
+      .from('job_alerts')
+      .select(`
+        *,
+        saved_searches (name, criteria),
+        jobs (title, company_name:profiles!jobs_hirer_id_fkey(company_name))
+      `)
+      .eq('user_id', userId)
+      .eq('is_sent', false)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  },
+
+  async markJobAlertAsSent(alertId: string): Promise<void> {
+    const { error } = await supabase
+      .from('job_alerts')
+      .update({ is_sent: true, sent_at: new Date().toISOString() })
+      .eq('id', alertId)
+
+    if (error) throw error
+  },
+
+  // Analytics functions
+  async logSearch(
+    userId: string,
+    searchType: 'jobs' | 'professionals',
+    query: string,
+    filters: any,
+    resultsCount: number,
+    sessionId?: string
+  ): Promise<void> {
+    const { error } = await supabase.rpc('log_search_analytics', {
+      p_user_id: userId,
+      p_search_type: searchType,
+      p_query: query,
+      p_filters: filters,
+      p_results_count: resultsCount,
+      p_session_id: sessionId
+    })
+
+    if (error) console.error('Failed to log search analytics:', error)
+  },
+
+  async getPopularSearches(searchType: 'jobs' | 'professionals', limit = 10): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('search_analytics')
+      .select('query, count(*)')
+      .eq('search_type', searchType)
+      .not('query', 'is', null)
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
+      .order('count', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    return data || []
+  },
+
+  // Suggestion functions
+  async getSkillSuggestions(query: string, limit = 10): Promise<string[]> {
+    const { data: jobSkills, error: jobError } = await supabase
+      .from('jobs')
+      .select('required_skills')
+      .not('required_skills', 'is', null)
+
+    const { data: profSkills, error: profError } = await supabase
+      .from('professional_profiles')
+      .select('skills')
+      .not('skills', 'is', null)
+
+    if (jobError || profError) return []
+
+    // Combine and deduplicate skills
+    const allSkills = new Set<string>()
+    
+    jobSkills?.forEach(job => {
+      job.required_skills?.forEach((skill: string) => allSkills.add(skill))
+    })
+    
+    profSkills?.forEach(prof => {
+      prof.skills?.forEach((skill: string) => allSkills.add(skill))
+    })
+
+    // Filter by query and return top matches
+    const filteredSkills = Array.from(allSkills)
+      .filter(skill => skill.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, limit)
+
+    return filteredSkills
+  },
+
+  async getLocationSuggestions(query: string, limit = 10): Promise<string[]> {
+    const { data: jobLocations, error: jobError } = await supabase
+      .from('jobs')
+      .select('location')
+      .not('location', 'is', null)
+      .ilike('location', `%${query}%`)
+      .limit(limit)
+
+    const { data: profLocations, error: profError } = await supabase
+      .from('profiles')
+      .select('location')
+      .not('location', 'is', null)
+      .ilike('location', `%${query}%`)
+      .limit(limit)
+
+    if (jobError || profError) return []
+
+    // Combine and deduplicate locations
+    const allLocations = new Set<string>()
+    
+    jobLocations?.forEach(job => {
+      if (job.location) allLocations.add(job.location)
+    })
+    
+    profLocations?.forEach(prof => {
+      if (prof.location) allLocations.add(prof.location)
+    })
+
+    return Array.from(allLocations).slice(0, limit)
+  },
+
+  // Filter utilities
+  buildJobFiltersFromUrl(searchParams: URLSearchParams): JobSearchFilters {
+    return {
+      query: searchParams.get('q') || undefined,
+      category: searchParams.get('category') || undefined,
+      jobType: searchParams.get('type') || undefined,
+      location: searchParams.get('location') || undefined,
+      remoteAllowed: searchParams.get('remote') === 'true' || undefined,
+      salaryMin: searchParams.get('salary_min') ? Number(searchParams.get('salary_min')) : undefined,
+      salaryMax: searchParams.get('salary_max') ? Number(searchParams.get('salary_max')) : undefined,
+      salaryType: searchParams.get('salary_type') || undefined,
+      requiredSkills: searchParams.get('skills')?.split(',') || undefined,
+      isUrgent: searchParams.get('urgent') === 'true' || undefined,
+      postedWithinDays: searchParams.get('posted_within') ? Number(searchParams.get('posted_within')) : undefined
+    }
+  },
+
+  buildProfessionalFiltersFromUrl(searchParams: URLSearchParams): ProfessionalSearchFilters {
+    return {
+      query: searchParams.get('q') || undefined,
+      skills: searchParams.get('skills')?.split(',') || undefined,
+      location: searchParams.get('location') || undefined,
+      hourlyRateMin: searchParams.get('rate_min') ? Number(searchParams.get('rate_min')) : undefined,
+      hourlyRateMax: searchParams.get('rate_max') ? Number(searchParams.get('rate_max')) : undefined,
+      availabilityStatus: searchParams.get('availability') || undefined,
+      experienceMin: searchParams.get('experience_min') ? Number(searchParams.get('experience_min')) : undefined,
+      ratingMin: searchParams.get('rating_min') ? Number(searchParams.get('rating_min')) : undefined,
+      licenses: searchParams.get('licenses')?.split(',') || undefined
+    }
+  },
+
+  filtersToUrlParams(filters: JobSearchFilters | ProfessionalSearchFilters): URLSearchParams {
+    const params = new URLSearchParams()
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          params.set(key, value.join(','))
+        } else {
+          params.set(key, String(value))
         }
-
-        setUser(user)
-
-        // Get user's applications
-        const applicationsData = await applicationQueries.getApplicationsByProfessional(user.id)
-        setApplications(applicationsData)
-      } catch (error) {
-        console.error('Error fetching applications:', error)
-      } finally {
-        setLoading(false)
       }
-    }
-
-    getApplications()
-  }, [router])
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'reviewed':
-        return 'bg-blue-100 text-blue-800'
-      case 'shortlisted':
-        return 'bg-purple-100 text-purple-800'
-      case 'rejected':
-        return 'bg-red-100 text-red-800'
-      case 'hired':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    })
     
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${diffInHours} hours ago`
-    
-    const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays} days ago`
-    
-    const diffInWeeks = Math.floor(diffInDays / 7)
-    return `${diffInWeeks} weeks ago`
+    return params
   }
-
-  const filteredApplications = applications.filter(app => 
-    selectedStatus === 'all' || app.status === selectedStatus
-  )
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading applications...</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Applications</h1>
-          <p className="text-gray-600">
-            Track your job applications and their status
-          </p>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Applications</option>
-              <option value="pending">Pending</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="shortlisted">Shortlisted</option>
-              <option value="rejected">Rejected</option>
-              <option value="hired">Hired</option>
-            </select>
-          </div>
-          <div className="text-sm text-gray-600">
-            {filteredApplications.length} of {applications.length} applications
-          </div>
-        </div>
-
-        {/* Applications List */}
-        {filteredApplications.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {selectedStatus === 'all' ? 'No applications yet' : `No ${selectedStatus} applications`}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {selectedStatus === 'all' 
-                  ? "Start applying to jobs to see your applications here"
-                  : `You don't have any ${selectedStatus} applications at the moment`
-                }
-              </p>
-              <Link href="/jobs">
-                <Button>Browse Jobs</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {filteredApplications.map((application) => (
-              <Card key={application.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {application.jobs?.title}
-                        </h3>
-                        <Badge className={getStatusColor(application.status)}>
-                          {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-gray-600 mb-3">
-                        <div className="flex items-center">
-                          <Building className="h-4 w-4 mr-1" />
-                          {application.jobs?.company_name || 'Company'}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          Applied {getTimeAgo(application.created_at)}
-                        </div>
-                        {application.proposed_rate && (
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            ${application.proposed_rate}/hr
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                        {application.cover_letter}
-                      </p>
-
-                      {application.hirer_notes && (
-                        <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                          <p className="text-sm font-medium text-blue-900 mb-1">Employer Notes:</p>
-                          <p className="text-sm text-blue-800">{application.hirer_notes}</p>
-                        </div>
-                      )}
-
-                      <div className="flex items-center space-x-4">
-                        <Link href={`/jobs/${application.job_id}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Job
-                          </Button>
-                        </Link>
-                        <Button variant="outline" size="sm">
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Message Employer
-                        </Button>
-                        {application.status === 'shortlisted' && (
-                          <Button size="sm">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Schedule Interview
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="ml-6 text-right">
-                      <div className="text-sm text-gray-600 mb-2">
-                        Job Status: <span className="font-medium">{application.jobs?.status}</span>
-                      </div>
-                      {application.jobs?.salary_min && application.jobs?.salary_max && (
-                        <div className="text-lg font-semibold text-green-600">
-                          ${application.jobs.salary_min.toLocaleString()} - ${application.jobs.salary_max.toLocaleString()}
-                          {application.jobs.salary_type === 'hourly' ? '/hr' : '/year'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-medium text-gray-900 mb-2">Find More Jobs</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Browse new opportunities that match your skills
-              </p>
-              <Link href="/jobs">
-                <Button variant="outline" className="w-full">
-                  Browse Jobs
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <MessageSquare className="h-8 w-8 text-green-600 mx-auto mb-3" />
-              <h3 className="font-medium text-gray-900 mb-2">Messages</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Check your conversations with employers
-              </p>
-              <Link href="/messages">
-                <Button variant="outline" className="w-full">
-                  View Messages
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Eye className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-              <h3 className="font-medium text-gray-900 mb-2">Profile Views</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                See who's viewing your professional profile
-              </p>
-              <Link href="/profile">
-                <Button variant="outline" className="w-full">
-                  View Profile
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
 }
