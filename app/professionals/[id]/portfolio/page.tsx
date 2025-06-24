@@ -101,33 +101,33 @@ export default function ProfessionalPortfolioPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-6">
-          <Link href={`/professionals/${id}`}>
-            <Button variant="ghost" className="flex items-center text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+          <Link href={`/professionals/${id}`} className="inline-block">
+            <Button variant="ghost" size="sm" className="flex items-center text-gray-600 hover:text-gray-900">
+              <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
               Back to Profile
             </Button>
           </Link>
         </div>
         
         {/* Professional Header */}
-        <div className="flex items-center mb-8">
-          <Avatar className="h-16 w-16 mr-4">
+        <div className="flex items-center mb-6 md:mb-8">
+          <Avatar className="h-12 w-12 md:h-16 md:w-16 mr-3 md:mr-4">
             <AvatarImage src={professional.profiles?.avatar_url} alt={getFullName()} />
             <AvatarFallback className="bg-blue-100 text-blue-700 text-lg font-medium">
               {getInitials(getFullName())}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{getFullName()}</h1>
-            <p className="text-gray-600">{professional.title || 'Professional'}</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">{getFullName()}</h1>
+            <p className="text-sm md:text-base text-gray-600">{professional.title || 'Professional'}</p>
           </div>
         </div>
         
         {/* Portfolio Header */}
-        <Card className="mb-8">
+        <Card className="mb-6 md:mb-8">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Briefcase className="mr-2 h-5 w-5 text-blue-600" />
+              <Briefcase className="mr-2 h-4 w-4 md:h-5 md:w-5 text-blue-600" />
               Portfolio
             </CardTitle>
             <CardDescription>
@@ -139,20 +139,20 @@ export default function ProfessionalPortfolioPage() {
         {/* Portfolio Items */}
         {portfolioItems.length === 0 ? (
           <Card>
-            <CardContent className="p-12 text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Portfolio Items Yet</h3>
-              <p className="text-gray-600 mb-4">
+            <CardContent className="p-8 md:p-12 text-center">
+              <FileText className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3 md:mb-4" />
+              <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1 md:mb-2">No Portfolio Items Yet</h3>
+              <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4">
                 This professional hasn't added any portfolio items yet.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {portfolioItems.map((item) => (
               <Card key={item.id} className="overflow-hidden">
                 {item.featured_image_url && (
-                  <div className="h-48 overflow-hidden">
+                  <div className="h-40 md:h-48 overflow-hidden">
                     <img 
                       src={item.featured_image_url} 
                       alt={item.title} 
@@ -160,44 +160,44 @@ export default function ProfessionalPortfolioPage() {
                     />
                   </div>
                 )}
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
+                <CardContent className="p-4 md:p-6">
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-1 md:mb-2">{item.title}</h3>
                   
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 mb-4">
+                  <div className="flex flex-wrap items-center text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
                     {item.project_type && (
-                      <div className="flex items-center mr-4 mb-2">
-                        <Briefcase className="w-4 h-4 mr-1" />
+                      <div className="flex items-center mr-3 md:mr-4 mb-1 md:mb-2">
+                        <Briefcase className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         {item.project_type}
                       </div>
                     )}
                     {(item.start_date || item.end_date) && (
-                      <div className="flex items-center mr-4 mb-2">
-                        <Calendar className="w-4 h-4 mr-1" />
+                      <div className="flex items-center mr-3 md:mr-4 mb-1 md:mb-2">
+                        <Calendar className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         {formatDate(item.start_date)} - {formatDate(item.end_date)}
                       </div>
                     )}
                     {item.location && (
-                      <div className="flex items-center mr-4 mb-2">
-                        <MapPin className="w-4 h-4 mr-1" />
+                      <div className="flex items-center mr-3 md:mr-4 mb-1 md:mb-2">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         {item.location}
                       </div>
                     )}
                     {item.project_value && (
-                      <div className="flex items-center mb-2">
-                        <DollarSign className="w-4 h-4 mr-1" />
+                      <div className="flex items-center mb-1 md:mb-2">
+                        <DollarSign className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         ${item.project_value.toLocaleString()}
                       </div>
                     )}
                   </div>
                   
-                  <p className="text-gray-700 mb-4">{item.description}</p>
+                  <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-3">{item.description}</p>
                   
                   {item.skills_used && item.skills_used.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Skills Used</h4>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mb-3 md:mb-4">
+                      <h4 className="text-xs md:text-sm font-medium text-gray-900 mb-1 md:mb-2">Skills Used</h4>
+                      <div className="flex flex-wrap gap-1 md:gap-2">
                         {item.skills_used.map((skill, index) => (
-                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          <span key={index} className="px-1.5 py-0.5 md:px-2 md:py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                             {skill}
                           </span>
                         ))}
@@ -206,29 +206,29 @@ export default function ProfessionalPortfolioPage() {
                   )}
                   
                   {item.client_testimonial && (
-                    <div className="mb-4 bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-700 text-sm italic">"{item.client_testimonial}"</p>
+                    <div className="mb-3 md:mb-4 bg-gray-50 p-3 md:p-4 rounded-lg">
+                      <p className="text-gray-700 text-xs md:text-sm italic">"{item.client_testimonial}"</p>
                       {item.client_name && (
-                        <p className="text-gray-600 text-xs mt-2">— {item.client_name}</p>
+                        <p className="text-gray-600 text-xs mt-1 md:mt-2">— {item.client_name}</p>
                       )}
                     </div>
                   )}
                   
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="flex flex-wrap gap-1 md:gap-2 mt-3 md:mt-4">
                     {item.image_urls && item.image_urls.length > 0 && (
-                      <Button variant="outline" size="sm">
-                        <ImageIcon className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" className="text-xs h-7 px-2">
+                        <ImageIcon className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                         {item.image_urls.length} Images
                       </Button>
                     )}
                     {item.document_urls && item.document_urls.length > 0 && (
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" className="text-xs h-7 px-2">
+                        <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                         {item.document_urls.length} Documents
                       </Button>
                     )}
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="w-4 h-4 mr-2" />
+                    <Button variant="outline" size="sm" className="text-xs h-7 px-2">
+                      <ExternalLink className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                       View Details
                     </Button>
                   </div>

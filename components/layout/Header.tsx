@@ -80,14 +80,14 @@ export default function Header() {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <img 
                 src="/New SeekCa Logo.svg" 
                 alt="SeekCa" 
-                className="h-10 w-auto"
+                className="h-8 w-auto md:h-10"
               />
             </Link>
           </div>
@@ -172,9 +172,10 @@ export default function Header() {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-1 h-8 w-8"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -187,7 +188,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-gray-200 bg-white">
             <div className="flex flex-col space-y-4">
               <Link 
                 href="/browse" 
@@ -212,7 +213,7 @@ export default function Header() {
               </Link>
               
               {user ? (
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-4 border-t border-gray-200 space-y-4">
                   <div className="flex items-center space-x-3 mb-4">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={profile?.avatar_url} alt={profile?.first_name || ''} />
@@ -230,20 +231,20 @@ export default function Header() {
                   </div>
                   <div className="flex flex-col space-y-2">
                     <Link href={getDashboardPath()}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant="ghost" className="w-full justify-start text-left">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Button>
                     </Link>
                     <Link href="/profile">
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant="ghost" className="w-full justify-start text-left">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Button>
                     </Link>
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-start" 
+                      className="w-full justify-start text-left" 
                       onClick={handleSignOut}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -253,10 +254,10 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
-                  <Link href="/auth/login">
+                  <Link href="/auth/login" className="w-full">
                     <Button variant="ghost" className="w-full">Sign in</Button>
                   </Link>
-                  <Link href="/auth/signup">
+                  <Link href="/auth/signup" className="w-full">
                     <Button className="w-full">Get Started</Button>
                   </Link>
                 </div>

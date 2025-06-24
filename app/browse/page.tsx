@@ -140,18 +140,18 @@ export default function BrowsePage() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               Browse Professionals
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Discover talented professionals ready to bring your projects to life. 
               Filter by skills, location, and availability to find the perfect match.
             </p>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+          <div className="bg-gray-50 rounded-xl p-4 md:p-6 space-y-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
@@ -170,7 +170,7 @@ export default function BrowsePage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Select value={skillFilter} onValueChange={setSkillFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by skill" />
@@ -231,7 +231,7 @@ export default function BrowsePage() {
       </div>
 
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-900">
             {filteredProfessionals.length} Professional{filteredProfessionals.length !== 1 ? 's' : ''} Found
@@ -256,86 +256,86 @@ export default function BrowsePage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {filteredProfessionals.map((professional) => (
               <Card key={professional.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start space-x-4">
-                    <Avatar className="w-16 h-16 ring-2 ring-blue-100">
+                <CardHeader className="pb-3 md:pb-4">
+                  <div className="flex items-start space-x-3 md:space-x-4">
+                    <Avatar className="w-14 h-14 md:w-16 md:h-16 ring-2 ring-blue-100">
                       <AvatarImage src={professional.profiles?.avatar_url} />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold">
                         {professional.profiles?.first_name?.[0]}{professional.profiles?.last_name?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg font-semibold text-gray-900 truncate">
+                      <CardTitle className="text-base md:text-lg font-semibold text-gray-900 truncate">
                         {professional.profiles?.first_name} {professional.profiles?.last_name}
                       </CardTitle>
-                      <p className="text-sm text-blue-600 font-medium mt-1">
+                      <p className="text-xs md:text-sm text-blue-600 font-medium mt-1">
                         {professional.title || 'Professional'}
                       </p>
-                      <div className="flex items-center mt-2 text-sm text-gray-500">
-                        <MapPin className="w-4 h-4 mr-1" />
+                      <div className="flex items-center mt-1 md:mt-2 text-xs md:text-sm text-gray-500">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         {professional.profiles?.location || 'Location not specified'}
                       </div>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-gray-600 line-clamp-2">
+                <CardContent className="space-y-3 md:space-y-4 px-4 pb-4 md:px-6 md:pb-6">
+                  <p className="text-xs md:text-sm text-gray-600 line-clamp-2">
                     {professional.profiles?.bio || 'No bio available'}
                   </p>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium text-gray-900">
+                      <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-xs md:text-sm font-medium text-gray-900">
                         {professional.rating?.toFixed(1) || '0.0'}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs md:text-sm text-gray-500">
                         ({professional.total_reviews || 0} reviews)
                       </span>
                     </div>
                     <Badge 
                       variant={professional.availability_status === 'available' ? 'default' : 'secondary'}
-                      className={professional.availability_status === 'available' ? 'bg-green-100 text-green-800' : ''}
+                      className={`text-xs ${professional.availability_status === 'available' ? 'bg-green-100 text-green-800' : ''}`}
                     >
-                      <Clock className="w-3 h-3 mr-1" />
+                      <Clock className="w-3 h-3 mr-1 hidden sm:inline" />
                       {professional.availability_status || 'Unknown'}
                     </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <DollarSign className="w-4 h-4 mr-1" />
+                    <div className="flex items-center text-xs md:text-sm text-gray-600">
+                      <DollarSign className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                       <span className="font-medium">
                         ${professional.hourly_rate || 0}/hr
                       </span>
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs md:text-sm text-gray-500">
                       {professional.experience_years || 0} years exp.
                     </span>
                   </div>
 
                   {professional.skills && professional.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 mt-2">
                       {professional.skills.slice(0, 3).map((skill, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={index} variant="outline" className="text-xs px-1.5 py-0 h-5">
                           {skill}
                         </Badge>
                       ))}
                       {professional.skills.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
                           +{professional.skills.length - 3} more
                         </Badge>
                       )}
                     </div>
                   )}
 
-                  <div className="pt-2">
+                  <div className="pt-1 md:pt-2">
                     <Link href={`/professionals/${professional.user_id}`}>
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm h-9">
                         View Profile
                       </Button>
                     </Link>
