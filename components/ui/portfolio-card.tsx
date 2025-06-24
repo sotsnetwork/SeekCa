@@ -5,15 +5,17 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
-  ExternalLink, 
   Calendar, 
   MapPin, 
-  DollarSign,
-  Star,
+  DollarSign, 
+  ExternalLink, 
+  Star, 
+  Award,
+  Clock,
+  User,
   Eye,
   Edit,
-  Trash2,
-  Award
+  Trash2
 } from 'lucide-react'
 import { PortfolioItem } from '@/lib/reviews'
 
@@ -27,14 +29,23 @@ interface PortfolioCardProps {
 
 export function PortfolioCard({ 
   item, 
-  showActions = true, 
+  showActions = false, 
   onEdit, 
-  onDelete,
-  className 
+  onDelete, 
+  className = '' 
 }: PortfolioCardProps) {
   const [imageError, setImageError] = useState(false)
 
-  const formatCurrency = (amount: number) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return null
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short'
+    })
+  }
+
+  const formatCurrency = (amount?: number) => {
+    if (!amount) return null
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -43,227 +54,190 @@ export function PortfolioCard({
     }).format(amount)
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short'
-    })
-  }
-
-  const calculateDuration = () => {
+  const getDuration = () => {
     if (item.duration_months) {
-      return `${item.duration_months} months`
+      return `${item.duration_months} month${item.duration_months !== 1 ? 's' : ''}`
     }
-    
     if (item.start_date && item.end_date) {
       const start = new Date(item.start_date)
       const end = new Date(item.end_date)
-      const diffTime = Math.abs(end.getTime() - start.getTime())
-      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30))
-      return `${diffMonths} months`
+      const months = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30))
+      return `${months} month${months !== 1 ? 's' : ''}`
     }
-    
     return null
   }
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${className}`}>
+    <Card className={`group hover:shadow-lg transition-all duration-300 ${className}`}>
       <CardContent className="p-0">
         {/* Featured Image */}
         {item.featured_image_url && !imageError && (
-          <div className="relative">
+          <div className="relative h-48 overflow-hidden rounded-t-lg">
             <img
               src={item.featured_image_url}
               alt={item.title}
-              className="w-full h-48 object-cover rounded-t-lg"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               onError={() => setImageError(true)}
             />
             {item.is_featured && (
-              <Badge className="absolute top-2 left-2 bg-yellow-500 text-yellow-900">
-                <Star className="w-3 h-3 mr-1" />
+              <Badge className="absolute top-3 left-3 bg-yellow-500 text-white">
+                <Star className="h-3 w-3 mr-1 fill-current" />
                 Featured
               </Badge>
+            )}
+            {showActions && (
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex space-x-1">
+                  {onEdit && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => onEdit(item)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => onDelete(item.id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         )}
 
         <div className="p-6">
           {/* Header */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          <div className="mb-4">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
                 {item.title}
               </h3>
-              {item.project_type && (
-                <Badge variant="outline" className="text-xs">
-                  {item.project_type}
+              {item.project_value && (
+                <Badge variant="outline" className="ml-2 text-green-700 border-green-200">
+                  {formatCurrency(item.project_value)}
                 </Badge>
               )}
             </div>
             
-            {showActions && (onEdit || onDelete) && (
-              <div className="flex items-center space-x-1">
-                {onEdit && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(item)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                )}
-                {onDelete && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(item.id)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
+            {item.project_type && (
+              <Badge variant="secondary" className="mb-2">
+                {item.project_type}
+              </Badge>
+            )}
+          </div>
+
+          {/* Project Details */}
+          <div className="space-y-2 mb-4 text-sm text-gray-600">
+            {(item.start_date || item.end_date) && (
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>
+                  {formatDate(item.start_date)} - {formatDate(item.end_date)}
+                  {getDuration() && (
+                    <span className="ml-2 text-gray-500">({getDuration()})</span>
+                  )}
+                </span>
+              </div>
+            )}
+            
+            {item.location && (
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>{item.location}</span>
+              </div>
+            )}
+            
+            {item.client_name && (
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                <span>{item.client_name}</span>
               </div>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+          <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
             {item.description}
           </p>
-
-          {/* Project Details */}
-          <div className="space-y-2 mb-4">
-            {item.client_name && (
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="font-medium">Client:</span>
-                <span className="ml-2">{item.client_name}</span>
-              </div>
-            )}
-            
-            {item.location && (
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin className="w-4 h-4 mr-1" />
-                {item.location}
-              </div>
-            )}
-            
-            {(item.start_date || item.end_date) && (
-              <div className="flex items-center text-sm text-gray-600">
-                <Calendar className="w-4 h-4 mr-1" />
-                {item.start_date && formatDate(item.start_date)}
-                {item.start_date && item.end_date && ' - '}
-                {item.end_date && formatDate(item.end_date)}
-                {calculateDuration() && (
-                  <span className="ml-2 text-gray-500">
-                    ({calculateDuration()})
-                  </span>
-                )}
-              </div>
-            )}
-            
-            {item.project_value && (
-              <div className="flex items-center text-sm text-gray-600">
-                <DollarSign className="w-4 h-4 mr-1" />
-                {formatCurrency(item.project_value)} project value
-              </div>
-            )}
-          </div>
 
           {/* Skills Used */}
           {item.skills_used && item.skills_used.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-medium text-gray-900 mb-2">Skills Used:</p>
               <div className="flex flex-wrap gap-1">
-                {item.skills_used.slice(0, 6).map((skill, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                {item.skills_used.slice(0, 4).map((skill, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
                     {skill}
                   </Badge>
                 ))}
-                {item.skills_used.length > 6 && (
+                {item.skills_used.length > 4 && (
                   <Badge variant="outline" className="text-xs">
-                    +{item.skills_used.length - 6} more
+                    +{item.skills_used.length - 4} more
                   </Badge>
                 )}
               </div>
             </div>
           )}
 
-          {/* Tools Used */}
-          {item.tools_used && item.tools_used.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-medium text-gray-900 mb-2">Tools & Technologies:</p>
-              <div className="flex flex-wrap gap-1">
-                {item.tools_used.slice(0, 4).map((tool, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {tool}
-                  </Badge>
-                ))}
-                {item.tools_used.length > 4 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{item.tools_used.length - 4} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Certifications Applied */}
-          {item.certifications_applied && item.certifications_applied.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-medium text-gray-900 mb-2">Certifications Applied:</p>
-              <div className="flex flex-wrap gap-1">
-                {item.certifications_applied.map((cert, index) => (
-                  <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700">
-                    <Award className="w-3 h-3 mr-1" />
-                    {cert}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Results Achieved */}
+          {/* Results/Testimonial */}
           {item.results_achieved && (
-            <div className="mb-4">
-              <p className="text-xs font-medium text-gray-900 mb-1">Results Achieved:</p>
-              <p className="text-sm text-gray-700">
+            <div className="mb-4 p-3 bg-green-50 rounded-lg">
+              <h4 className="text-sm font-medium text-green-900 mb-1 flex items-center">
+                <Award className="h-4 w-4 mr-1" />
+                Results Achieved
+              </h4>
+              <p className="text-sm text-green-800 line-clamp-2">
                 {item.results_achieved}
               </p>
             </div>
           )}
 
-          {/* Client Testimonial */}
           {item.client_testimonial && (
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-              <p className="text-xs font-medium text-blue-900 mb-1">Client Testimonial:</p>
-              <p className="text-sm text-blue-800 italic">
+            <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+              <p className="text-sm text-blue-800 italic line-clamp-2">
                 "{item.client_testimonial}"
               </p>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center space-x-2">
-              {item.document_urls && item.document_urls.length > 0 && (
-                <Button variant="outline" size="sm">
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Documents ({item.document_urls.length})
-                </Button>
-              )}
-              
-              {item.image_urls && item.image_urls.length > 0 && (
-                <Button variant="outline" size="sm">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Gallery ({item.image_urls.length})
-                </Button>
-              )}
+          {/* Additional Images */}
+          {item.image_urls && item.image_urls.length > 0 && (
+            <div className="mb-4">
+              <div className="flex space-x-2 overflow-x-auto">
+                {item.image_urls.slice(0, 3).map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`${item.title} - Image ${index + 1}`}
+                    className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                  />
+                ))}
+                {item.image_urls.length > 3 && (
+                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-gray-600">
+                      +{item.image_urls.length - 3}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
+          )}
 
-            <div className="text-xs text-gray-500">
-              {new Date(item.created_at).toLocaleDateString()}
-            </div>
+          {/* Action Button */}
+          <div className="pt-4 border-t border-gray-100">
+            <Button variant="outline" className="w-full group-hover:bg-blue-50 group-hover:border-blue-200">
+              <Eye className="h-4 w-4 mr-2" />
+              View Details
+              <ExternalLink className="h-3 w-3 ml-2" />
+            </Button>
           </div>
         </div>
       </CardContent>

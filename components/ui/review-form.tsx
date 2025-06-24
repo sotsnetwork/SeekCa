@@ -7,7 +7,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Star, Send, X } from 'lucide-react'
+import { 
+  Star, 
+  Send, 
+  Award, 
+  MessageSquare, 
+  Clock, 
+  Users, 
+  CheckCircle,
+  AlertTriangle
+} from 'lucide-react'
 import { reviewService, Review } from '@/lib/reviews'
 
 interface ReviewFormProps {
@@ -41,11 +50,43 @@ export function ReviewForm({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const [hoverRating, setHoverRating] = useState(0)
-  const [hoverSkills, setHoverSkills] = useState(0)
-  const [hoverCommunication, setHoverCommunication] = useState(0)
-  const [hoverTimeliness, setHoverTimeliness] = useState(0)
-  const [hoverProfessionalism, setHoverProfessionalism] = useState(0)
+  const handleStarClick = (starRating: number, setter: (rating: number) => void) => {
+    setter(starRating)
+  }
+
+  const renderStarRating = (
+    currentRating: number,
+    onRatingChange: (rating: number) => void,
+    label: string,
+    required = false
+  ) => (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">
+        {label} {required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="flex items-center space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => handleStarClick(star, onRatingChange)}
+            className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+          >
+            <Star
+              className={`h-6 w-6 transition-colors ${
+                star <= currentRating
+                  ? 'text-yellow-400 fill-current'
+                  : 'text-gray-300 hover:text-yellow-200'
+              }`}
+            />
+          </button>
+        ))}
+        <span className="ml-2 text-sm text-gray-600">
+          {currentRating > 0 ? `${currentRating} star${currentRating !== 1 ? 's' : ''}` : 'Click to rate'}
+        </span>
+      </div>
+    </div>
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,40 +129,13 @@ export function ReviewForm({
     }
   }
 
-  const StarRating = ({ 
-    value, 
-    onChange, 
-    hover, 
-    onHover, 
-    onLeave 
-  }: { 
-    value: number
-    onChange: (rating: number) => void
-    hover: number
-    onHover: (rating: number) => void
-    onLeave: () => void
-  }) => (
-    <div className="flex space-x-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`h-6 w-6 cursor-pointer transition-colors ${
-            star <= (hover || value) 
-              ? 'text-yellow-400 fill-current' 
-              : 'text-gray-300'
-          }`}
-          onClick={() => onChange(star)}
-          onMouseEnter={() => onHover(star)}
-          onMouseLeave={onLeave}
-        />
-      ))}
-    </div>
-  )
-
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Write a Review</CardTitle>
+        <CardTitle className="flex items-center">
+          <Star className="mr-2 h-5 w-5 text-yellow-500" />
+          Write a Review
+        </CardTitle>
         <CardDescription>
           Share your experience working with {revieweeName} on "{jobTitle}"
         </CardDescription>
@@ -130,36 +144,14 @@ export function ReviewForm({
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* Overall Rating */}
-          <div className="space-y-2">
-            <Label className="text-base font-medium">
-              Overall Rating *
-            </Label>
-            <div className="flex items-center space-x-3">
-              <StarRating
-                value={rating}
-                onChange={setRating}
-                hover={hoverRating}
-                onHover={setHoverRating}
-                onLeave={() => setHoverRating(0)}
-              />
-              <span className="text-sm text-gray-600">
-                {rating > 0 && (
-                  <>
-                    {rating} star{rating !== 1 ? 's' : ''}
-                    {rating === 5 && ' - Excellent!'}
-                    {rating === 4 && ' - Very Good'}
-                    {rating === 3 && ' - Good'}
-                    {rating === 2 && ' - Fair'}
-                    {rating === 1 && ' - Poor'}
-                  </>
-                )}
-              </span>
-            </div>
+          <div className="space-y-4">
+            {renderStarRating(rating, setRating, 'Overall Rating', true)}
           </div>
 
           {/* Review Title */}
@@ -167,82 +159,63 @@ export function ReviewForm({
             <Label htmlFor="title">Review Title (Optional)</Label>
             <Input
               id="title"
+              placeholder="Summarize your experience in a few words"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Summarize your experience..."
               maxLength={100}
             />
           </div>
 
           {/* Review Comment */}
           <div className="space-y-2">
-            <Label htmlFor="comment">Your Review *</Label>
+            <Label htmlFor="comment">
+              Your Review <span className="text-red-500">*</span>
+            </Label>
             <textarea
               id="comment"
               rows={5}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Describe your experience working with this professional. What did they do well? How was the communication and quality of work?"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Share details about your experience working with this professional..."
               required
             />
-            <p className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 text-right">
               {comment.length}/1000 characters
-            </p>
-          </div>
-
-          {/* Detailed Ratings */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Detailed Ratings (Optional)</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Skills & Expertise</Label>
-                <StarRating
-                  value={skillsRating}
-                  onChange={setSkillsRating}
-                  hover={hoverSkills}
-                  onHover={setHoverSkills}
-                  onLeave={() => setHoverSkills(0)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Communication</Label>
-                <StarRating
-                  value={communicationRating}
-                  onChange={setCommunicationRating}
-                  hover={hoverCommunication}
-                  onHover={setHoverCommunication}
-                  onLeave={() => setHoverCommunication(0)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Timeliness</Label>
-                <StarRating
-                  value={timelinessRating}
-                  onChange={setTimelinessRating}
-                  hover={hoverTimeliness}
-                  onHover={setHoverTimeliness}
-                  onLeave={() => setHoverTimeliness(0)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Professionalism</Label>
-                <StarRating
-                  value={professionalismRating}
-                  onChange={setProfessionalismRating}
-                  hover={hoverProfessionalism}
-                  onHover={setHoverProfessionalism}
-                  onLeave={() => setHoverProfessionalism(0)}
-                />
-              </div>
             </div>
           </div>
 
-          {/* Additional Options */}
+          {/* Category Ratings */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+              <Award className="mr-2 h-5 w-5 text-blue-600" />
+              Detailed Ratings (Optional)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderStarRating(
+                skillsRating,
+                setSkillsRating,
+                'Technical Skills & Quality'
+              )}
+              {renderStarRating(
+                communicationRating,
+                setCommunicationRating,
+                'Communication'
+              )}
+              {renderStarRating(
+                timelinessRating,
+                setTimelinessRating,
+                'Timeliness & Reliability'
+              )}
+              {renderStarRating(
+                professionalismRating,
+                setProfessionalismRating,
+                'Professionalism'
+              )}
+            </div>
+          </div>
+
+          {/* Recommendation */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -250,44 +223,39 @@ export function ReviewForm({
                 checked={wouldRecommend}
                 onCheckedChange={setWouldRecommend}
               />
-              <Label htmlFor="recommend">
+              <Label htmlFor="recommend" className="flex items-center">
+                <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
                 I would recommend this professional to others
               </Label>
             </div>
+          </div>
 
+          {/* Privacy Settings */}
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-medium text-gray-900">Privacy Settings</h4>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="public"
                 checked={isPublic}
                 onCheckedChange={setIsPublic}
               />
-              <Label htmlFor="public">
-                Make this review public (visible to other users)
+              <Label htmlFor="public" className="text-sm">
+                Make this review public (visible on the professional's profile)
               </Label>
             </div>
+            <p className="text-xs text-gray-600">
+              Public reviews help other clients make informed decisions. Your name will be displayed with public reviews.
+            </p>
           </div>
 
-          {/* Submit Buttons */}
-          <div className="flex justify-end space-x-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={submitting}
-            >
-              <X className="w-4 h-4 mr-2" />
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4 pt-6 border-t">
+            <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={submitting || rating === 0 || !comment.trim()}
-            >
-              {submitting ? 'Submitting...' : (
-                <>
-                  <Send className="w-4 h-4 mr-2" />
-                  Submit Review
-                </>
-              )}
+            <Button type="submit" disabled={submitting || rating === 0 || !comment.trim()}>
+              {submitting ? 'Submitting...' : 'Submit Review'}
+              <Send className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>

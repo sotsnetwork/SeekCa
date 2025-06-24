@@ -6,31 +6,31 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Search, 
-  Filter, 
-  X, 
+  MapPin, 
+  DollarSign, 
+  Clock, 
+  Star, 
+  Filter,
+  X,
   Plus,
-  MapPin,
-  DollarSign,
-  Clock,
-  Star,
-  Award,
-  Save
+  Save,
+  Zap,
+  Wrench,
+  Building,
+  Users,
+  Home,
+  Truck
 } from 'lucide-react'
-import { JobSearchFilters, ProfessionalSearchFilters } from '@/lib/search'
+import { searchService } from '@/lib/search'
 
 interface AdvancedSearchProps {
   searchType: 'jobs' | 'professionals'
-  initialFilters?: JobSearchFilters | ProfessionalSearchFilters
+  initialFilters?: any
   onSearch: (filters: any) => void
   onSaveSearch?: (name: string, filters: any, enableAlert: boolean) => void
 }
@@ -42,550 +42,515 @@ export function AdvancedSearch({
   onSaveSearch 
 }: AdvancedSearchProps) {
   const [query, setQuery] = useState(initialFilters.query || '')
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [location, setLocation] = useState(initialFilters.location || '')
+  const [skills, setSkills] = useState<string[]>(initialFilters.skills || [])
+  const [newSkill, setNewSkill] = useState('')
+  const [skillSuggestions, setSkillSuggestions] = useState<string[]>([])
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([])
   const [showSaveDialog, setShowSaveDialog] = useState(false)
-  const [savedSearchName, setSavedSearchName] = useState('')
+  const [searchName, setSearchName] = useState('')
   const [enableAlert, setEnableAlert] = useState(false)
 
   // Job-specific filters
-  const [category, setCategory] = useState((initialFilters as JobSearchFilters).category || '')
-  const [jobType, setJobType] = useState((initialFilters as JobSearchFilters).jobType || '')
-  const [location, setLocation] = useState(initialFilters.location || '')
-  const [remoteAllowed, setRemoteAllowed] = useState((initialFilters as JobSearchFilters).remoteAllowed || false)
-  const [salaryMin, setSalaryMin] = useState((initialFilters as JobSearchFilters).salaryMin?.toString() || '')
-  const [salaryMax, setSalaryMax] = useState((initialFilters as JobSearchFilters).salaryMax?.toString() || '')
-  const [salaryType, setSalaryType] = useState((initialFilters as JobSearchFilters).salaryType || '')
-  const [isUrgent, setIsUrgent] = useState((initialFilters as JobSearchFilters).isUrgent || false)
-  const [postedWithinDays, setPostedWithinDays] = useState((initialFilters as JobSearchFilters).postedWithinDays?.toString() || '')
+  const [category, setCategory] = useState(initialFilters.category || '')
+  const [jobType, setJobType] = useState(initialFilters.jobType || '')
+  const [salaryRange, setSalaryRange] = useState([
+    initialFilters.salaryMin || 0,
+    initialFilters.salaryMax || 200
+  ])
+  const [salaryType, setSalaryType] = useState(initialFilters.salaryType || 'hourly')
+  const [remoteAllowed, setRemoteAllowed] = useState(initialFilters.remoteAllowed || false)
+  const [isUrgent, setIsUrgent] = useState(initialFilters.isUrgent || false)
+  const [postedWithin, setPostedWithin] = useState(initialFilters.postedWithinDays || '')
 
   // Professional-specific filters
-  const [hourlyRateMin, setHourlyRateMin] = useState((initialFilters as ProfessionalSearchFilters).hourlyRateMin?.toString() || '')
-  const [hourlyRateMax, setHourlyRateMax] = useState((initialFilters as ProfessionalSearchFilters).hourlyRateMax?.toString() || '')
-  const [availabilityStatus, setAvailabilityStatus] = useState((initialFilters as ProfessionalSearchFilters).availabilityStatus || '')
-  const [experienceMin, setExperienceMin] = useState((initialFilters as ProfessionalSearchFilters).experienceMin?.toString() || '')
-  const [ratingMin, setRatingMin] = useState((initialFilters as ProfessionalSearchFilters).ratingMin?.toString() || '')
-
-  // Common filters
-  const [skills, setSkills] = useState<string[]>(
-    (initialFilters as any).skills || (initialFilters as any).requiredSkills || []
-  )
-  const [licenses, setLicenses] = useState<string[]>(
-    (initialFilters as any).licenses || (initialFilters as any).requiredLicenses || []
-  )
-  const [skillInput, setSkillInput] = useState('')
-  const [licenseInput, setLicenseInput] = useState('')
+  const [rateRange, setRateRange] = useState([
+    initialFilters.hourlyRateMin || 0,
+    initialFilters.hourlyRateMax || 300
+  ])
+  const [experienceMin, setExperienceMin] = useState(initialFilters.experienceMin || 0)
+  const [ratingMin, setRatingMin] = useState(initialFilters.ratingMin || 0)
+  const [availabilityStatus, setAvailabilityStatus] = useState(initialFilters.availabilityStatus || '')
 
   const categories = [
-    { value: 'engineering', label: 'Engineering' },
-    { value: 'construction', label: 'Construction & Trades' },
-    { value: 'real-estate', label: 'Real Estate' },
-    { value: 'project-management', label: 'Project Management' },
-    { value: 'design', label: 'Design & Architecture' },
-    { value: 'services', label: 'Personal Services' },
-    { value: 'consulting', label: 'Professional Consulting' },
-    { value: 'other', label: 'Other' }
+    { id: 'engineering', name: 'Engineering', icon: Zap },
+    { id: 'construction', name: 'Construction & Trades', icon: Wrench },
+    { id: 'real-estate', name: 'Real Estate', icon: Building },
+    { id: 'project-management', name: 'Project Management', icon: Users },
+    { id: 'design', name: 'Design & Architecture', icon: Home },
+    { id: 'consulting', name: 'Technical Consulting', icon: Truck }
   ]
 
-  const jobTypes = [
-    { value: 'full-time', label: 'Full-time' },
-    { value: 'part-time', label: 'Part-time' },
-    { value: 'contract', label: 'Contract' },
-    { value: 'freelance', label: 'Freelance' }
+  const professionalSkills = [
+    'Electrical Wiring', 'Electrical Design', 'Power Systems', 'Circuit Design',
+    'Plumbing Installation', 'Pipe Fitting', 'Water Systems', 'Gas Lines',
+    'HVAC Installation', 'Air Conditioning', 'Heating Systems', 'Refrigeration',
+    'Carpentry', 'Framing', 'Finish Carpentry', 'Cabinet Making',
+    'Masonry', 'Brickwork', 'Concrete Work', 'Stone Work',
+    'Welding', 'Arc Welding', 'MIG Welding', 'TIG Welding',
+    'Painting', 'Interior Painting', 'Exterior Painting',
+    'Tiling', 'Ceramic Tiling', 'Stone Tiling',
+    'Roofing', 'Shingle Installation', 'Metal Roofing',
+    'Architecture', 'Building Design', 'CAD Design',
+    'Surveying', 'Land Surveying', 'Construction Surveying',
+    'Interior Design', 'Space Planning',
+    'Project Management', 'Construction Management', 'Quality Control'
   ]
 
-  const salaryTypes = [
-    { value: 'hourly', label: 'Hourly' },
-    { value: 'salary', label: 'Annual Salary' },
-    { value: 'project', label: 'Project-based' }
-  ]
+  useEffect(() => {
+    if (newSkill.length > 1) {
+      const suggestions = professionalSkills
+        .filter(skill => skill.toLowerCase().includes(newSkill.toLowerCase()))
+        .filter(skill => !skills.includes(skill))
+        .slice(0, 5)
+      setSkillSuggestions(suggestions)
+    } else {
+      setSkillSuggestions([])
+    }
+  }, [newSkill, skills])
 
-  const availabilityOptions = [
-    { value: 'available', label: 'Available' },
-    { value: 'busy', label: 'Busy' },
-    { value: 'unavailable', label: 'Unavailable' }
-  ]
-
-  const addSkill = () => {
-    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-      setSkills([...skills, skillInput.trim()])
-      setSkillInput('')
+  const addSkill = (skill: string) => {
+    if (skill && !skills.includes(skill)) {
+      setSkills([...skills, skill])
+      setNewSkill('')
+      setSkillSuggestions([])
     }
   }
 
-  const removeSkill = (skill: string) => {
-    setSkills(skills.filter(s => s !== skill))
-  }
-
-  const addLicense = () => {
-    if (licenseInput.trim() && !licenses.includes(licenseInput.trim())) {
-      setLicenses([...licenses, licenseInput.trim()])
-      setLicenseInput('')
-    }
-  }
-
-  const removeLicense = (license: string) => {
-    setLicenses(licenses.filter(l => l !== license))
+  const removeSkill = (skillToRemove: string) => {
+    setSkills(skills.filter(skill => skill !== skillToRemove))
   }
 
   const handleSearch = () => {
-    const baseFilters = {
-      query: query.trim() || undefined,
-      location: location.trim() || undefined,
-      skills: skills.length > 0 ? skills : undefined,
-      licenses: licenses.length > 0 ? licenses : undefined
+    const filters: any = {
+      query: query || undefined,
+      location: location || undefined,
+      skills: skills.length > 0 ? skills : undefined
     }
 
     if (searchType === 'jobs') {
-      const jobFilters: JobSearchFilters = {
-        ...baseFilters,
-        category: category || undefined,
-        jobType: jobType || undefined,
-        remoteAllowed: remoteAllowed || undefined,
-        salaryMin: salaryMin ? Number(salaryMin) : undefined,
-        salaryMax: salaryMax ? Number(salaryMax) : undefined,
-        salaryType: salaryType || undefined,
-        requiredSkills: skills.length > 0 ? skills : undefined,
-        requiredLicenses: licenses.length > 0 ? licenses : undefined,
-        isUrgent: isUrgent || undefined,
-        postedWithinDays: postedWithinDays ? Number(postedWithinDays) : undefined
-      }
-      onSearch(jobFilters)
+      filters.category = category || undefined
+      filters.jobType = jobType || undefined
+      filters.salaryMin = salaryRange[0] > 0 ? salaryRange[0] : undefined
+      filters.salaryMax = salaryRange[1] < 200 ? salaryRange[1] : undefined
+      filters.salaryType = salaryType !== 'hourly' ? salaryType : undefined
+      filters.remoteAllowed = remoteAllowed || undefined
+      filters.isUrgent = isUrgent || undefined
+      filters.postedWithinDays = postedWithin ? Number(postedWithin) : undefined
     } else {
-      const professionalFilters: ProfessionalSearchFilters = {
-        ...baseFilters,
-        hourlyRateMin: hourlyRateMin ? Number(hourlyRateMin) : undefined,
-        hourlyRateMax: hourlyRateMax ? Number(hourlyRateMax) : undefined,
-        availabilityStatus: availabilityStatus || undefined,
-        experienceMin: experienceMin ? Number(experienceMin) : undefined,
-        ratingMin: ratingMin ? Number(ratingMin) : undefined
-      }
-      onSearch(professionalFilters)
+      filters.hourlyRateMin = rateRange[0] > 0 ? rateRange[0] : undefined
+      filters.hourlyRateMax = rateRange[1] < 300 ? rateRange[1] : undefined
+      filters.experienceMin = experienceMin > 0 ? experienceMin : undefined
+      filters.ratingMin = ratingMin > 0 ? ratingMin : undefined
+      filters.availabilityStatus = availabilityStatus || undefined
     }
+
+    onSearch(filters)
   }
 
   const handleSaveSearch = () => {
-    if (!onSaveSearch || !savedSearchName.trim()) return
+    if (!onSaveSearch || !searchName.trim()) return
 
-    const filters = searchType === 'jobs' ? {
-      query: query.trim() || undefined,
-      category: category || undefined,
-      jobType: jobType || undefined,
-      location: location.trim() || undefined,
-      remoteAllowed: remoteAllowed || undefined,
-      salaryMin: salaryMin ? Number(salaryMin) : undefined,
-      salaryMax: salaryMax ? Number(salaryMax) : undefined,
-      salaryType: salaryType || undefined,
-      requiredSkills: skills.length > 0 ? skills : undefined,
-      requiredLicenses: licenses.length > 0 ? licenses : undefined,
-      isUrgent: isUrgent || undefined,
-      postedWithinDays: postedWithinDays ? Number(postedWithinDays) : undefined
-    } : {
-      query: query.trim() || undefined,
-      skills: skills.length > 0 ? skills : undefined,
-      location: location.trim() || undefined,
-      hourlyRateMin: hourlyRateMin ? Number(hourlyRateMin) : undefined,
-      hourlyRateMax: hourlyRateMax ? Number(hourlyRateMax) : undefined,
-      availabilityStatus: availabilityStatus || undefined,
-      experienceMin: experienceMin ? Number(experienceMin) : undefined,
-      ratingMin: ratingMin ? Number(ratingMin) : undefined,
-      licenses: licenses.length > 0 ? licenses : undefined
+    const filters: any = {
+      query,
+      location,
+      skills
     }
 
-    onSaveSearch(savedSearchName.trim(), filters, enableAlert)
+    if (searchType === 'jobs') {
+      Object.assign(filters, {
+        category,
+        jobType,
+        salaryMin: salaryRange[0],
+        salaryMax: salaryRange[1],
+        salaryType,
+        remoteAllowed,
+        isUrgent,
+        postedWithinDays: postedWithin ? Number(postedWithin) : undefined
+      })
+    } else {
+      Object.assign(filters, {
+        hourlyRateMin: rateRange[0],
+        hourlyRateMax: rateRange[1],
+        experienceMin,
+        ratingMin,
+        availabilityStatus
+      })
+    }
+
+    onSaveSearch(searchName, filters, enableAlert)
     setShowSaveDialog(false)
-    setSavedSearchName('')
+    setSearchName('')
     setEnableAlert(false)
   }
 
   const clearFilters = () => {
     setQuery('')
+    setLocation('')
+    setSkills([])
     setCategory('')
     setJobType('')
-    setLocation('')
+    setSalaryRange([0, 200])
+    setSalaryType('hourly')
     setRemoteAllowed(false)
-    setSalaryMin('')
-    setSalaryMax('')
-    setSalaryType('')
     setIsUrgent(false)
-    setPostedWithinDays('')
-    setHourlyRateMin('')
-    setHourlyRateMax('')
+    setPostedWithin('')
+    setRateRange([0, 300])
+    setExperienceMin(0)
+    setRatingMin(0)
     setAvailabilityStatus('')
-    setExperienceMin('')
-    setRatingMin('')
-    setSkills([])
-    setLicenses([])
-    setSkillInput('')
-    setLicenseInput('')
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Search className="mr-2 h-5 w-5 text-blue-600" />
-          Advanced Search
+          Advanced {searchType === 'jobs' ? 'Job' : 'Professional'} Search
         </CardTitle>
         <CardDescription>
-          Find exactly what you're looking for with detailed filters
+          Use detailed filters to find exactly what you're looking for
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Basic Search */}
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <Input
-              placeholder={`Search ${searchType}...`}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="text-lg"
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="query">Search Keywords</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                id="query"
+                placeholder={searchType === 'jobs' ? 'Job title, company, description...' : 'Name, title, skills...'}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
-          <Button onClick={handleSearch} size="lg">
-            <Search className="w-4 h-4 mr-2" />
-            Search
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            size="lg"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </Button>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                id="location"
+                placeholder="City, state, or remote"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Advanced Filters */}
-        {showAdvanced && (
-          <div className="space-y-6 p-4 border rounded-lg bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Location */}
+        {/* Skills */}
+        <div className="space-y-3">
+          <Label>Required Skills</Label>
+          <div className="space-y-2">
+            <div className="relative">
+              <Input
+                placeholder="Add a skill..."
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addSkill(newSkill)
+                  }
+                }}
+              />
+              {newSkill && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 px-2"
+                  onClick={() => addSkill(newSkill)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            
+            {skillSuggestions.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {skillSuggestions.map((skill) => (
+                  <Button
+                    key={skill}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => addSkill(skill)}
+                  >
+                    {skill}
+                  </Button>
+                ))}
+              </div>
+            )}
+            
+            {skills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="pr-1">
+                    {skill}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                      onClick={() => removeSkill(skill)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Job-specific filters */}
+        {searchType === 'jobs' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  Location
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="City, State, or Remote"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
+                <Label>Category</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Categories</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-
-              {/* Job-specific filters */}
-              {searchType === 'jobs' && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
-                        {categories.map(cat => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Job Type</Label>
-                    <Select value={jobType} onValueChange={setJobType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select job type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Types</SelectItem>
-                        {jobTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Salary Type</Label>
-                    <Select value={salaryType} onValueChange={setSalaryType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select salary type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Any</SelectItem>
-                        {salaryTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      Min Salary
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="50000"
-                      value={salaryMin}
-                      onChange={(e) => setSalaryMin(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      Max Salary
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="100000"
-                      value={salaryMax}
-                      onChange={(e) => setSalaryMax(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Posted Within (days)
-                    </Label>
-                    <Select value={postedWithinDays} onValueChange={setPostedWithinDays}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Any time</SelectItem>
-                        <SelectItem value="1">Last 24 hours</SelectItem>
-                        <SelectItem value="7">Last week</SelectItem>
-                        <SelectItem value="30">Last month</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-
-              {/* Professional-specific filters */}
-              {searchType === 'professionals' && (
-                <>
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      Min Hourly Rate
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="50"
-                      value={hourlyRateMin}
-                      onChange={(e) => setHourlyRateMin(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      Max Hourly Rate
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="200"
-                      value={hourlyRateMax}
-                      onChange={(e) => setHourlyRateMax(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Availability</Label>
-                    <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any availability" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Any availability</SelectItem>
-                        {availabilityOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Min Experience (years)
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="5"
-                      value={experienceMin}
-                      onChange={(e) => setExperienceMin(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <Star className="w-4 h-4 mr-1" />
-                      Min Rating
-                    </Label>
-                    <Select value={ratingMin} onValueChange={setRatingMin}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any rating" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Any rating</SelectItem>
-                        <SelectItem value="4">4+ stars</SelectItem>
-                        <SelectItem value="4.5">4.5+ stars</SelectItem>
-                        <SelectItem value="5">5 stars only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
+              <div className="space-y-2">
+                <Label>Job Type</Label>
+                <Select value={jobType} onValueChange={setJobType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="freelance">Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Posted Within</Label>
+                <Select value={postedWithin} onValueChange={setPostedWithin}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Any time</SelectItem>
+                    <SelectItem value="1">Last 24 hours</SelectItem>
+                    <SelectItem value="7">Last week</SelectItem>
+                    <SelectItem value="30">Last month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Skills */}
-            <div className="space-y-3">
-              <Label>Skills</Label>
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Add a skill..."
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addSkill()}
-                />
-                <Button type="button" onClick={addSkill} variant="outline">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {skills.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      {skill}
-                      <X 
-                        className="w-3 h-3 cursor-pointer" 
-                        onClick={() => removeSkill(skill)}
-                      />
-                    </Badge>
-                  ))}
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <Label>Salary Range ({salaryType})</Label>
+                <div className="px-3">
+                  <Slider
+                    value={salaryRange}
+                    onValueChange={setSalaryRange}
+                    max={200}
+                    min={0}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-sm text-gray-600 mt-1">
+                    <span>${salaryRange[0]}{salaryType === 'hourly' ? '/hr' : 'k'}</span>
+                    <span>${salaryRange[1]}{salaryType === 'hourly' ? '/hr' : 'k'}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Licenses */}
-            <div className="space-y-3">
-              <Label className="flex items-center">
-                <Award className="w-4 h-4 mr-1" />
-                Licenses/Certifications
-              </Label>
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Add a license..."
-                  value={licenseInput}
-                  onChange={(e) => setLicenseInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addLicense()}
-                />
-                <Button type="button" onClick={addLicense} variant="outline">
-                  <Plus className="w-4 h-4" />
-                </Button>
+                <Select value={salaryType} onValueChange={setSalaryType}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="salary">Annual</SelectItem>
+                    <SelectItem value="project">Project</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              {licenses.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {licenses.map((license, index) => (
-                    <Badge key={index} variant="outline" className="flex items-center gap-1 bg-green-50 text-green-700">
-                      <Award className="w-3 h-3" />
-                      {license}
-                      <X 
-                        className="w-3 h-3 cursor-pointer" 
-                        onClick={() => removeLicense(license)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* Job-specific checkboxes */}
-            {searchType === 'jobs' && (
-              <div className="flex space-x-6">
+              <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remote" 
+                  <Checkbox
+                    id="remote"
                     checked={remoteAllowed}
                     onCheckedChange={setRemoteAllowed}
                   />
                   <Label htmlFor="remote">Remote work allowed</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="urgent" 
+                  <Checkbox
+                    id="urgent"
                     checked={isUrgent}
                     onCheckedChange={setIsUrgent}
                   />
                   <Label htmlFor="urgent">Urgent hiring only</Label>
                 </div>
               </div>
-            )}
+            </div>
+          </>
+        )}
 
-            {/* Action Buttons */}
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={clearFilters}>
-                Clear All Filters
-              </Button>
-              <div className="flex space-x-2">
-                {onSaveSearch && (
-                  <Button variant="outline" onClick={() => setShowSaveDialog(true)}>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Search
-                  </Button>
-                )}
-                <Button onClick={handleSearch}>
-                  Apply Filters
-                </Button>
+        {/* Professional-specific filters */}
+        {searchType === 'professionals' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Availability</Label>
+                <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any availability" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Any availability</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="unavailable">Unavailable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Minimum Experience</Label>
+                <Select value={experienceMin.toString()} onValueChange={(value) => setExperienceMin(Number(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any experience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Any experience</SelectItem>
+                    <SelectItem value="1">1+ years</SelectItem>
+                    <SelectItem value="3">3+ years</SelectItem>
+                    <SelectItem value="5">5+ years</SelectItem>
+                    <SelectItem value="10">10+ years</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </div>
+
+            <div className="space-y-3">
+              <Label>Hourly Rate Range</Label>
+              <div className="px-3">
+                <Slider
+                  value={rateRange}
+                  onValueChange={setRateRange}
+                  max={300}
+                  min={0}
+                  step={10}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-600 mt-1">
+                  <span>${rateRange[0]}/hr</span>
+                  <span>${rateRange[1]}/hr</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Minimum Rating</Label>
+              <div className="flex items-center space-x-2">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <Button
+                    key={rating}
+                    variant={ratingMin >= rating ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setRatingMin(rating)}
+                    className="flex items-center"
+                  >
+                    <Star className={`h-4 w-4 ${ratingMin >= rating ? 'fill-current' : ''}`} />
+                    <span className="ml-1">{rating}+</span>
+                  </Button>
+                ))}
+                {ratingMin > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRatingMin(0)}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
+          </>
         )}
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" onClick={clearFilters}>
+              <X className="h-4 w-4 mr-2" />
+              Clear Filters
+            </Button>
+            {onSaveSearch && (
+              <Button variant="outline" onClick={() => setShowSaveDialog(true)}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Search
+              </Button>
+            )}
+          </div>
+          <Button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700">
+            <Search className="h-4 w-4 mr-2" />
+            Search
+          </Button>
+        </div>
 
         {/* Save Search Dialog */}
         {showSaveDialog && (
-          <div className="p-4 border rounded-lg bg-blue-50">
-            <h3 className="font-medium mb-3">Save This Search</h3>
-            <div className="space-y-3">
-              <Input
-                placeholder="Enter search name..."
-                value={savedSearchName}
-                onChange={(e) => setSavedSearchName(e.target.value)}
-              />
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="enableAlert" 
-                  checked={enableAlert}
-                  onCheckedChange={setEnableAlert}
-                />
-                <Label htmlFor="enableAlert">
-                  Email me when new {searchType} match this search
-                </Label>
-              </div>
-              <div className="flex space-x-2">
-                <Button onClick={handleSaveSearch} disabled={!savedSearchName.trim()}>
-                  Save Search
-                </Button>
-                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle>Save Search</CardTitle>
+                <CardDescription>
+                  Save this search to quickly access it later
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="searchName">Search Name</Label>
+                  <Input
+                    id="searchName"
+                    placeholder="e.g., Senior Electricians in NYC"
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="enableAlert"
+                    checked={enableAlert}
+                    onCheckedChange={setEnableAlert}
+                  />
+                  <Label htmlFor="enableAlert">
+                    Email me when new {searchType} match this search
+                  </Label>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveSearch} disabled={!searchName.trim()}>
+                    Save Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </CardContent>
