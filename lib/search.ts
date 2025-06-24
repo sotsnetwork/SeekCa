@@ -244,10 +244,10 @@ export const searchService = {
   async getSkillSuggestions(query: string, limit = 10): Promise<string[]> {
     // Professional handwork and engineering skills
     const professionalSkills = [
+      'Electrician',
       'Electrical Wiring',
-      'Electrical Design',
-      'Power Systems',
-      'Circuit Design',
+      'Electrical Troubleshooting',
+      'Circuit Installation',
       'Motor Control',
       'PLC Programming',
       'Plumbing Installation',
@@ -269,10 +269,13 @@ export const searchService = {
       'Brickwork',
       'Concrete Work',
       'Stone Work',
-      'Welding',
       'Arc Welding',
       'MIG Welding',
       'TIG Welding',
+      'Welding',
+      'Metal Fabrication',
+      'Structural Welding',
+      'Pipe Welding',
       'Fabrication',
       'Painting',
       'Interior Painting',
