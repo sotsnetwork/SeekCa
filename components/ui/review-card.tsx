@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,31 +7,23 @@ import { ReviewWithDetails } from '@/lib/reviews'
 
 interface ReviewCardProps {
   review: ReviewWithDetails
-  onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void
-  canVote?: boolean
-  showJobDetails?: boolean
-  compact?: boolean
+  onVoteHelpful: (reviewId: string, isHelpful: boolean) => void
+  canVote: boolean
 }
 
-export function ReviewCard({ 
-  review, 
-  onVoteHelpful, 
-  canVote = true,
-  showJobDetails = true,
-  compact = false
-}: ReviewCardProps) {
-  const [voted, setVoted] = useState(false)
+export function ReviewCard({ review, onVoteHelpful, canVote }: ReviewCardProps) {
+  const [hasVoted, setHasVoted] = useState(false)
   
-  const handleVoteHelpful = () => {
-    if (onVoteHelpful && !voted) {
+  const handleVote = () => {
+    if (canVote && !hasVoted) {
       onVoteHelpful(review.id, true)
-      setVoted(true)
+      setHasVoted(true)
     }
   }
   
   return (
-    <Card className={`overflow-hidden ${compact ? 'border-0 shadow-none' : ''}`}>
-      <CardContent className={compact ? 'p-3' : 'p-6'}>
+    <Card className="overflow-hidden">
+      <CardContent className="p-6">
         <div className="flex items-start">
           <div className="flex-1">
             <div className="flex items-center mb-2">
@@ -41,7 +31,7 @@ export function ReviewCard({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-${compact ? '4' : '5'} h-${compact ? '4' : '5'} ${
+                    className={`w-5 h-5 ${
                       star <= review.rating
                         ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-300'
@@ -49,19 +39,19 @@ export function ReviewCard({
                   />
                 ))}
               </div>
-              <h3 className={`${compact ? 'text-base' : 'text-lg'} font-semibold text-gray-900`}>
+              <h3 className="text-lg font-semibold text-gray-900">
                 {review.title || `${review.rating}-Star Review`}
               </h3>
             </div>
             
-            <div className="flex items-center text-sm text-gray-500 mb-2">
+            <div className="flex items-center text-sm text-gray-500 mb-4">
               <Calendar className="w-4 h-4 mr-1" />
               {new Date(review.created_at).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
               })}
-              {showJobDetails && review.job_title && (
+              {review.job_title && (
                 <>
                   <span className="mx-2">•</span>
                   <span>Project: {review.job_title}</span>
@@ -69,11 +59,10 @@ export function ReviewCard({
               )}
             </div>
             
-            <p className={`text-gray-700 ${compact ? 'text-sm mb-2 line-clamp-2' : 'mb-4'}`}>
-              {review.comment}
-            </p>
+            <p className="text-gray-700 mb-4">{review.comment}</p>
             
-            {!compact && (review.skills_rating || review.communication_rating || 
+            {/* Category Ratings */}
+            {(review.skills_rating || review.communication_rating || 
               review.timeliness_rating || review.professionalism_rating) && (
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {review.skills_rating && (
@@ -149,36 +138,34 @@ export function ReviewCard({
             
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Avatar className={`h-${compact ? '6' : '8'} w-${compact ? '6' : '8'} mr-2`}>
+                <Avatar className="h-8 w-8 mr-2">
                   <AvatarImage src={review.reviewer_avatar} alt={review.reviewer_name || ''} />
                   <AvatarFallback className="bg-gray-100 text-gray-600">
                     {review.reviewer_name?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className={`${compact ? 'text-sm' : 'font-medium'} text-gray-900`}>
+                <span className="font-medium text-gray-900">
                   {review.reviewer_name || 'Anonymous'}
                 </span>
-                {!compact && review.reviewer_company && (
+                {review.reviewer_company && (
                   <span className="text-gray-500 ml-2">
                     from {review.reviewer_company}
                   </span>
                 )}
               </div>
-              {!compact && onVoteHelpful && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleVoteHelpful}
-                  disabled={!canVote || voted}
-                >
-                  <ThumbsUp className="w-4 h-4 mr-2" />
-                  Helpful ({review.helpful_count})
-                </Button>
-              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleVote}
+                disabled={!canVote || hasVoted}
+              >
+                <ThumbsUp className="w-4 h-4 mr-2" />
+                Helpful ({review.helpful_count})
+              </Button>
             </div>
             
             {/* Response to review */}
-            {!compact && review.response_text && (
+            {review.response_text && (
               <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center mb-2">
                   <span className="font-medium text-gray-900">Response from Professional</span>
