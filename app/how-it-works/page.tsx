@@ -189,16 +189,25 @@ export default function HowItWorks() {
             {[
               { name: 'Electrical Engineers', icon: '⚡', count: '500+' },
               { name: 'Mechanical Engineers', icon: '⚙️', count: '400+' },
+              { name: 'Civil Engineers', icon: '🏗️', count: '350+' },
+              { name: 'Structural Engineers', icon: '🏢', count: '150+' },
               { name: 'Project Managers', icon: '📋', count: '600+' },
               { name: 'Real Estate Developers', icon: '🏢', count: '200+' },
               { name: 'Licensed Plumbers', icon: '🔧', count: '300+' },
+              { name: 'Master Electricians', icon: '⚡', count: '280+' },
+              { name: 'HVAC Technicians', icon: '🌡️', count: '220+' },
+              { name: 'Welders & Fabricators', icon: '🔥', count: '190+' },
+              { name: 'Carpenters', icon: '🪚', count: '320+' },
+              { name: 'Masons', icon: '🧱', count: '180+' },
+              { name: 'Roofers', icon: '🏠', count: '160+' },
+              { name: 'Painters', icon: '🎨', count: '250+' },
+              { name: 'Tilers', icon: '⬜', count: '140+' },
               { name: 'Interior Designers', icon: '🎨', count: '250+' },
               { name: 'Architects', icon: '📐', count: '180+' },
+              { name: 'Surveyors', icon: '📏', count: '120+' },
               { name: 'Construction Supervisors', icon: '👷', count: '350+' },
-              { name: 'HVAC Technicians', icon: '🌡️', count: '220+' },
-              { name: 'Structural Engineers', icon: '🏗️', count: '150+' },
-              { name: 'Personal Assistants', icon: '📱', count: '400+' },
-              { name: 'Property Managers', icon: '🏠', count: '280+' }
+              { name: 'Property Managers', icon: '🏠', count: '280+' },
+              { name: 'Landscape Architects', icon: '🌳', count: '110+' }
             ].map((category, index) => (
               <Card key={index} className="text-center hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="p-6">

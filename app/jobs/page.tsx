@@ -45,7 +45,7 @@ export default function JobsPage() {
     { id: 'real-estate', name: 'Real Estate', count: 4, icon: Building },
     { id: 'project-management', name: 'Project Management', count: 3, icon: Users },
     { id: 'design', name: 'Design & Architecture', count: 2, icon: Home },
-    { id: 'services', name: 'Personal Services', count: 1, icon: Truck }
+    { id: 'consulting', name: 'Technical Consulting', count: 1, icon: Truck }
   ]
 
   useEffect(() => {

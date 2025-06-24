@@ -98,13 +98,20 @@ export default function PostJob() {
     'PE License (Professional Engineer)',
     'Master Plumber License',
     'Electrical License',
-    'Real Estate License',
-    'PMP Certification',
-    'NCIDQ Certification',
-    'OSHA Certification',
     'HVAC License',
     'General Contractor License',
-    'Architecture License'
+    'Architecture License',
+    'Surveyor License',
+    'Welding Certification',
+    'Roofing License',
+    'Masonry License',
+    'Carpentry Certification',
+    'Interior Design License',
+    'Tiling Certification',
+    'Painting Contractor License',
+    'Real Estate License',
+    'OSHA Certification',
+    'NCIDQ Certification'
   ]
 
   const addField = (setter: any, fields: string[]) => {

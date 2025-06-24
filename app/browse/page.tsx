@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,10 +40,6 @@ export default function BrowsePage() {
   const [rateFilter, setRateFilter] = useState('all')
   const [availabilityFilter, setAvailabilityFilter] = useState('all')
   
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
 
   useEffect(() => {
     fetchProfessionals()
@@ -181,11 +177,18 @@ export default function BrowsePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Skills</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="python">Python</SelectItem>
-                  <SelectItem value="react">React</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="electrical">Electrical Engineering</SelectItem>
+                  <SelectItem value="plumbing">Plumbing</SelectItem>
+                  <SelectItem value="hvac">HVAC</SelectItem>
+                  <SelectItem value="carpentry">Carpentry</SelectItem>
+                  <SelectItem value="masonry">Masonry</SelectItem>
+                  <SelectItem value="painting">Painting</SelectItem>
+                  <SelectItem value="tiling">Tiling</SelectItem>
+                  <SelectItem value="roofing">Roofing</SelectItem>
+                  <SelectItem value="welding">Welding</SelectItem>
+                  <SelectItem value="architecture">Architecture</SelectItem>
+                  <SelectItem value="surveying">Surveying</SelectItem>
+                  <SelectItem value="interior-design">Interior Design</SelectItem>
                 </SelectContent>
               </Select>
 

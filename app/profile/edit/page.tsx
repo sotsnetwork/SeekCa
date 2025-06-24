@@ -542,7 +542,7 @@ export default function EditProfile() {
                       {skills.map((skill, index) => (
                         <div key={index} className="flex items-center space-x-2">
                           <Input
-                            placeholder="e.g., AutoCAD, Project Management, Electrical Design"
+                            placeholder="e.g., Electrical Wiring, HVAC Installation, Plumbing Systems"
                             value={skill}
                             onChange={(e) => updateField(setSkills, skills, index, e.target.value)}
                           />
@@ -577,7 +577,7 @@ export default function EditProfile() {
                       {licenses.map((license, index) => (
                         <div key={index} className="flex items-center space-x-2">
                           <Input
-                            placeholder="e.g., PE License, Master Plumber License, PMP Certification"
+                            placeholder="e.g., PE License, Master Plumber License, Electrical License"
                             value={license}
                             onChange={(e) => updateField(setLicenses, licenses, index, e.target.value)}
                           />
@@ -612,7 +612,7 @@ export default function EditProfile() {
                       {certifications.map((cert, index) => (
                         <div key={index} className="flex items-center space-x-2">
                           <Input
-                            placeholder="e.g., OSHA Certification, NCIDQ, Six Sigma"
+                            placeholder="e.g., OSHA Certification, Welding Certification, HVAC Certification"
                             value={cert}
                             onChange={(e) => updateField(setCertifications, certifications, index, e.target.value)}
                           />

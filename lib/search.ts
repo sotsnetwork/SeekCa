@@ -242,35 +242,70 @@ export const searchService = {
 
   // Suggestion functions
   async getSkillSuggestions(query: string, limit = 10): Promise<string[]> {
-    const { data: jobSkills, error: jobError } = await supabase
-      .from('jobs')
-      .select('required_skills')
-      .not('required_skills', 'is', null)
+    // Professional handwork and engineering skills
+    const professionalSkills = [
+      'Electrical Wiring',
+      'Electrical Design',
+      'Power Systems',
+      'Circuit Design',
+      'Motor Control',
+      'PLC Programming',
+      'Plumbing Installation',
+      'Pipe Fitting',
+      'Water Systems',
+      'Drainage Systems',
+      'Gas Lines',
+      'HVAC Installation',
+      'Air Conditioning',
+      'Heating Systems',
+      'Ventilation',
+      'Refrigeration',
+      'Carpentry',
+      'Framing',
+      'Finish Carpentry',
+      'Cabinet Making',
+      'Flooring',
+      'Masonry',
+      'Brickwork',
+      'Concrete Work',
+      'Stone Work',
+      'Welding',
+      'Arc Welding',
+      'MIG Welding',
+      'TIG Welding',
+      'Fabrication',
+      'Painting',
+      'Interior Painting',
+      'Exterior Painting',
+      'Surface Preparation',
+      'Tiling',
+      'Ceramic Tiling',
+      'Stone Tiling',
+      'Roofing',
+      'Shingle Installation',
+      'Metal Roofing',
+      'Roof Repair',
+      'Architecture',
+      'Building Design',
+      'CAD Design',
+      'Structural Design',
+      'Surveying',
+      'Land Surveying',
+      'Construction Surveying',
+      'Interior Design',
+      'Space Planning',
+      'Project Management',
+      'Construction Management',
+      'Quality Control',
+      'Safety Management',
+      'Blueprint Reading',
+      'Code Compliance',
+      'Permit Processing'
+    ]
 
-    const { data: profSkills, error: profError } = await supabase
-      .from('professional_profiles')
-      .select('skills')
-      .not('skills', 'is', null)
-
-    if (jobError || profError) return []
-
-    // Combine and deduplicate skills
-    const allSkills = new Set<string>()
-    
-    jobSkills?.forEach(job => {
-      job.required_skills?.forEach((skill: string) => allSkills.add(skill))
-    })
-    
-    profSkills?.forEach(prof => {
-      prof.skills?.forEach((skill: string) => allSkills.add(skill))
-    })
-
-    // Filter by query and return top matches
-    const filteredSkills = Array.from(allSkills)
+    return professionalSkills
       .filter(skill => skill.toLowerCase().includes(query.toLowerCase()))
       .slice(0, limit)
-
-    return filteredSkills
   },
 
   async getLocationSuggestions(query: string, limit = 10): Promise<string[]> {
