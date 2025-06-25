@@ -14,7 +14,7 @@ export interface Notification {
   created_at: string
 }
 
-export interface NotificationPreferences {
+interface NotificationPreferences {
   id: string
   user_id: string
   email_notifications: boolean

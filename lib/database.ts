@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-export interface JobSearchFilters {
+interface JobSearchFilters {
   query?: string
   category?: string
   jobType?: string
@@ -17,7 +17,7 @@ export interface JobSearchFilters {
   offset?: number
 }
 
-export interface ProfessionalSearchFilters {
+interface ProfessionalSearchFilters {
   query?: string
   skills?: string[]
   location?: string
@@ -31,7 +31,7 @@ export interface ProfessionalSearchFilters {
   offset?: number
 }
 
-export interface SavedSearch {
+interface SavedSearch {
   id: string
   user_id: string
   name: string
@@ -44,7 +44,7 @@ export interface SavedSearch {
   updated_at: string
 }
 
-export interface JobAlert {
+interface JobAlert {
   id: string
   user_id: string
   saved_search_id: string
@@ -54,7 +54,7 @@ export interface JobAlert {
   created_at: string
 }
 
-export interface SearchResult<T> {
+interface SearchResult<T> {
   data: T[]
   total: number
   hasMore: boolean
@@ -130,7 +130,7 @@ export const jobQueries = {
 }
 
 // Application queries
-export const applicationQueries = {
+const applicationQueries = {
   async getApplicationsByJob(jobId: string) {
     const { data, error } = await supabase
       .from('applications')
@@ -267,7 +267,7 @@ export const applicationQueries = {
 }
 
 // Message queries
-export const messageQueries = {
+const messageQueries = {
   async getConversations(userId: string) {
     const { data, error } = await supabase
       .from('conversations')
@@ -348,7 +348,7 @@ export interface Job {
   updated_at: string
 }
 
-export const searchService = {
+const searchService = {
   // Job search functions
   async searchJobs(filters: JobSearchFilters): Promise<SearchResult<any>> {
     const { data, error } = await supabase.rpc('search_jobs', {

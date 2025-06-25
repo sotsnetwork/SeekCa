@@ -46,7 +46,7 @@ export interface SavedSearch {
   updated_at: string
 }
 
-export interface JobAlert {
+interface JobAlert {
   id: string
   user_id: string
   saved_search_id: string
@@ -56,7 +56,7 @@ export interface JobAlert {
   created_at: string
 }
 
-export interface SearchResult<T> {
+interface SearchResult<T> {
   data: T[]
   total: number
   hasMore: boolean

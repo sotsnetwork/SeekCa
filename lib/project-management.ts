@@ -131,7 +131,7 @@ export interface ProjectFile {
   }
 }
 
-export interface MilestonePayment {
+interface MilestonePayment {
   id: string
   project_id: string
   milestone_id: string
@@ -150,7 +150,7 @@ export interface MilestonePayment {
   updated_at: string
 }
 
-export interface ProjectDashboard {
+interface ProjectDashboard {
   project_id: string
   project_title: string
   project_status: string

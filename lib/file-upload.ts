@@ -2,7 +2,7 @@
 
 import { supabase } from './supabase'
 
-export interface FileUploadOptions {
+interface FileUploadOptions {
   bucket?: string
   folder?: string
   maxSize?: number // in bytes
@@ -37,7 +37,7 @@ const DEFAULT_OPTIONS: FileUploadOptions = {
   ]
 }
 
-export class FileUploadError extends Error {
+class FileUploadError extends Error {
   constructor(message: string, public code?: string) {
     super(message)
     this.name = 'FileUploadError'

@@ -29,17 +29,17 @@ export const signIn = async (email: string, password: string) => {
   return data
 }
 
-export const signOut = async () => {
+const signOut = async () => {
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
 
-export const getCurrentUser = async () => {
+const getCurrentUser = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   return user
 }
 
-export const getUserProfile = async (userId: string) => {
+const getUserProfile = async (userId: string) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')

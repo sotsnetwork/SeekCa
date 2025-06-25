@@ -77,7 +77,7 @@ export interface PortfolioItem {
   updated_at: string
 }
 
-export interface ReviewResponse {
+interface ReviewResponse {
   id: string
   review_id: string
   responder_id: string
