@@ -84,11 +84,11 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-                                                     <img 
-               src="/Artboard 1 Blue Icon.svg" 
-               alt="SeekCa" 
-               className="h-12 w-auto md:h-16"
-             />
+                                                                                                           <img 
+                src="/Artboard 1 Blue Icon.svg" 
+                alt="SeekCa" 
+                className="h-48 w-auto md:h-64"
+              />
             </Link>
           </div>
 
