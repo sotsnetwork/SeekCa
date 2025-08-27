@@ -85,7 +85,7 @@ export default function Header() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
                                                                                                            <img 
-                src="/Artboard 1 Blue Icon.svg" 
+                src="/Blue Icon.png" 
                 alt="SeekCa" 
                 className="h-48 w-auto md:h-64"
               />
