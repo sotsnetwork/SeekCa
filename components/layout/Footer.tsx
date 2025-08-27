@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="col-span-1 sm:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
                                                                                                            <img 
-                src="/Artboard 1 Blue Icon.svg" 
+                src="/Blue Icon.png" 
                 alt="SeekCa" 
                 className="h-48 w-auto"
               />
