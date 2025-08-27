@@ -87,7 +87,7 @@ export default function Header() {
                                                                                                            <img 
                 src="/Blue Icon.png" 
                 alt="SeekCa" 
-                className="h-12 w-auto md:h-16"
+                className="h-10 w-auto md:h-14"
               />
             </Link>
           </div>
