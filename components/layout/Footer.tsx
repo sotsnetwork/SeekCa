@@ -12,7 +12,7 @@ export default function Footer() {
                                                                                                            <img 
                 src="/Blue Icon.png" 
                 alt="SeekCa" 
-                className="h-48 w-auto"
+                className="h-12 w-auto"
               />
             </div>
             <p className="text-gray-400 max-w-md">
