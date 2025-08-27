@@ -78,8 +78,8 @@ export default function SignUp() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="text-center">
                       <div className="flex items-center justify-center mx-auto mb-4">
             <img 
@@ -88,16 +88,16 @@ export default function SignUp() {
               className="h-16 w-auto"
             />
           </div>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-gray-900 dark:text-white">Check Your Email</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
               We've sent you a confirmation link to complete your registration.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 Didn't receive the email? Check your spam folder or{' '}
-                <button className="text-blue-600 hover:underline">
+                <button className="text-blue-600 dark:text-blue-400 hover:underline">
                   resend confirmation
                 </button>
               </p>
@@ -114,8 +114,8 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img 
@@ -124,8 +124,8 @@ export default function SignUp() {
               className="h-16 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl">Join SeekCa</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl text-gray-900 dark:text-white">Join SeekCa</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">
             Create your account to get started
           </CardDescription>
         </CardHeader>
@@ -139,7 +139,7 @@ export default function SignUp() {
 
             {/* Role Selection */}
             <div className="space-y-3">
-              <Label className="text-base font-medium">I want to:</Label>
+              <Label className="text-base font-medium text-gray-900 dark:text-white">I want to:</Label>
               <RadioGroup
                 value={role}
                 onValueChange={(value) => setRole(value as UserRole)}
@@ -261,9 +261,9 @@ export default function SignUp() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
-              <Link href="/auth/login" className="text-blue-600 hover:underline">
+              <Link href="/auth/login" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Sign in
               </Link>
             </p>
