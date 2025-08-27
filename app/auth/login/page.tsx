@@ -35,8 +35,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img 
@@ -45,8 +45,8 @@ export default function Login() {
               className="h-16 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl text-gray-900 dark:text-white">Welcome Back</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">
             Sign in to your SeekCa account
           </CardDescription>
         </CardHeader>
@@ -86,15 +86,15 @@ export default function Login() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+            <Link href="/auth/forgot-password" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
               Forgot your password?
             </Link>
           </div>
 
           <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Don't have an account?{' '}
-              <Link href="/auth/signup" className="text-blue-600 hover:underline">
+              <Link href="/auth/signup" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Sign up
               </Link>
             </p>
