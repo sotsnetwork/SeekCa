@@ -15,7 +15,6 @@ extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
-enabled = true
 # Port to use for the local database URL.
 port = 54322
 # Port used by db diff command to initialize the shadow database.
@@ -255,14 +254,14 @@ vector_port = 54328
 backend = "postgres"
 
 # Experimental features may be deprecated any time
-[experimental]
+# [experimental]
 # Configures Postgres storage-engine with S3 as the data layer
-s3_enabled = false
+# s3_enabled = false
 # Configures S3 bucket URL (eg. <bucket_name>.s3-<region>.amazonaws.com)
-s3_bucket = "env(S3_BUCKET)"
+# s3_bucket = "env(S3_BUCKET)"
 # Configures S3 region (eg. us-east-1)
-s3_region = "env(S3_REGION)"
+# s3_region = "env(S3_REGION)"
 # Configures AWS_ACCESS_KEY_ID for S3 bucket
-s3_access_key_id = "env(S3_ACCESS_KEY_ID)"
+# s3_access_key_id = "env(S3_ACCESS_KEY_ID)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
-s3_secret_access_key = "env(S3_SECRET_ACCESS_KEY)"
+# s3_secret_access_key = "env(S3_SECRET_ACCESS_KEY)"
