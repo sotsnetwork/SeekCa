@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { ThemeProvider } from '@/lib/theme';
+
 
 export const metadata: Metadata = {
   title: 'SeekCa - Professional Services Platform',
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link
@@ -24,15 +24,13 @@ export default function RootLayout({
         />
       </head>
       <body style={{ fontFamily: 'Inter, sans-serif' }}>
-        <ThemeProvider>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </ThemeProvider>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
