@@ -77,11 +77,6 @@ export const fileUpload = {
       // Upload to Supabase Storage
       // Simulate successful upload for testing
       const uploadData = { path: storagePath }
-      const uploadError = null
-
-      if (uploadError) {
-        throw new FileUploadError(uploadError.message, 'UPLOAD_FAILED')
-      }
 
       // Get public URL
       // Simulate URL generation
