@@ -151,109 +151,111 @@ export default function SignUp() {
                     id="professional"
                     className="peer sr-only"
                   />
-                  <Label
-                    htmlFor="professional"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                  >
-                    <User className="mb-3 h-6 w-6" />
-                    <div className="text-center">
-                      <div className="font-medium">Offer Services</div>
-                      <div className="text-xs text-muted-foreground">As a Professional</div>
-                    </div>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="hirer"
-                    id="hirer"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="hirer"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                  >
-                    <Building className="mb-3 h-6 w-6" />
-                    <div className="text-center">
-                      <div className="font-medium">Hire Talent</div>
-                      <div className="text-xs text-muted-foreground">As a Company</div>
-                    </div>
-                  </Label>
+                                     <Label
+                     htmlFor="professional"
+                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-gray-900 dark:text-white"
+                   >
+                     <User className="mb-3 h-6 w-6" />
+                     <div className="text-center">
+                       <div className="font-medium">Offer Services</div>
+                       <div className="text-xs text-muted-foreground">As a Professional</div>
+                     </div>
+                   </Label>
+                 </div>
+                 <div>
+                   <RadioGroupItem
+                     value="hirer"
+                     id="hirer"
+                     className="peer sr-only"
+                   />
+                   <Label
+                     htmlFor="hirer"
+                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-gray-900 dark:text-white"
+                   >
+                     <Building className="mb-3 h-6 w-6" />
+                     <div className="text-center">
+                       <div className="font-medium">Hire Talent</div>
+                       <div className="text-xs text-muted-foreground">As a Company</div>
+                     </div>
+                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {/* Professional Fields */}
-            {role === 'professional' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            )}
+                         {/* Professional Fields */}
+             {role === 'professional' && (
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                   <Label htmlFor="firstName" className="text-gray-900 dark:text-white">First Name</Label>
+                   <Input
+                     id="firstName"
+                     type="text"
+                     value={firstName}
+                     onChange={(e) => setFirstName(e.target.value)}
+                     required
+                   />
+                 </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="lastName" className="text-gray-900 dark:text-white">Last Name</Label>
+                   <Input
+                     id="lastName"
+                     type="text"
+                     value={lastName}
+                     onChange={(e) => setLastName(e.target.value)}
+                     required
+                   />
+                 </div>
+               </div>
+             )}
 
-            {/* Hirer Fields */}
-            {role === 'hirer' && (
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input
-                  id="companyName"
-                  type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
+             {/* Hirer Fields */}
+             {role === 'hirer' && (
+               <div className="space-y-2">
+                 <Label htmlFor="companyName" className="text-gray-900 dark:text-white">Company Name</Label>
+                 <Input
+                   id="companyName"
+                   type="text"
+                   value={companyName}
+                   onChange={(e) => setCompanyName(e.target.value)}
+                   required
+                 />
+               </div>
+             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+             <div className="space-y-2">
+               <Label htmlFor="email" className="text-gray-900 dark:text-white">Email</Label>
+               <Input
+                 id="email"
+                 type="email"
+                 value={email}
+                 onChange={(e) => setEmail(e.target.value)}
+                 required
+               />
+             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+             <div className="space-y-2">
+               <Label htmlFor="password" className="text-gray-900 dark:text-white">Password</Label>
+               <Input
+                 id="password"
+                 type="password"
+                 value={password}
+                 onChange={(e) => setPassword(e.target.value)}
+                 required
+                 className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+               />
+             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+             <div className="space-y-2">
+               <Label htmlFor="confirmPassword" className="text-gray-900 dark:text-white">Confirm Password</Label>
+               <Input
+                 id="confirmPassword"
+                 type="password"
+                 value={confirmPassword}
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+                 required
+                 className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+               />
+             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating Account...' : 'Create Account'}
