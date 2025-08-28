@@ -186,7 +186,7 @@ export default function SignUp() {
              {role === 'professional' && (
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                   <Label htmlFor="firstName" className="text-gray-900 dark:text-white">First Name</Label>
+                   <Label htmlFor="firstName">First Name</Label>
                    <Input
                      id="firstName"
                      type="text"
@@ -196,7 +196,7 @@ export default function SignUp() {
                    />
                  </div>
                  <div className="space-y-2">
-                   <Label htmlFor="lastName" className="text-gray-900 dark:text-white">Last Name</Label>
+                   <Label htmlFor="lastName">Last Name</Label>
                    <Input
                      id="lastName"
                      type="text"
@@ -211,7 +211,7 @@ export default function SignUp() {
              {/* Hirer Fields */}
              {role === 'hirer' && (
                <div className="space-y-2">
-                 <Label htmlFor="companyName" className="text-gray-900 dark:text-white">Company Name</Label>
+                 <Label htmlFor="companyName">Company Name</Label>
                  <Input
                    id="companyName"
                    type="text"
@@ -250,6 +250,7 @@ export default function SignUp() {
                  id="confirmPassword"
                  type="password"
                  value={confirmPassword}
+                 onChange={(e) => setConfirmPassword(e.target.value)}
                  required
                />
              </div>
