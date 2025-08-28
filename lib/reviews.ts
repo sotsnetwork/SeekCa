@@ -403,7 +403,7 @@ export const portfolioService = {
     if (error) throw error
 
     const items = data || []
-    const projectTypes = [...new Set(items.map(item => item.project_type).filter(Boolean))]
+    const projectTypes = Array.from(new Set(items.map(item => item.project_type).filter(Boolean)))
     const totalValue = items.reduce((sum, item) => sum + (item.project_value || 0), 0)
     const featuredCount = items.filter(item => item.is_featured).length
 
