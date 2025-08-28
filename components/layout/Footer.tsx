@@ -3,7 +3,7 @@ import { Briefcase } from 'lucide-react'
 
 export default function Footer() {
   return (
-        <footer className="bg-gray-900 dark:bg-gray-950 text-white">
+        <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Logo and description */}
@@ -15,7 +15,7 @@ export default function Footer() {
                 className="h-10 w-auto"
               />
             </div>
-            <p className="text-gray-400 dark:text-gray-300 max-w-md">
+            <p className="text-gray-400 max-w-md">
               Connect with top professionals and find the perfect talent for your projects. 
               SeekCa makes professional services accessible and reliable.
             </p>
@@ -24,7 +24,7 @@ export default function Footer() {
           {/* For Professionals */}
           <div>
             <h3 className="text-lg font-semibold mb-4">For Professionals</h3>
-            <ul className="space-y-2 text-gray-400 dark:text-gray-300">
+            <ul className="space-y-2 text-gray-400">
               <li>
                 <Link href="/how-it-works" className="hover:text-white transition-colors">
                   How It Works
@@ -46,7 +46,7 @@ export default function Footer() {
           {/* For Hirers */}
           <div>
             <h3 className="text-lg font-semibold mb-4">For Hirers</h3>
-            <ul className="space-y-2 text-gray-400 dark:text-gray-300">
+            <ul className="space-y-2 text-gray-400">
               <li>
                 <Link href="/browse" className="hover:text-white transition-colors">
                   Browse Professionals
@@ -66,18 +66,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-gray-400 dark:text-gray-300 text-sm">
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <p className="text-gray-400 text-sm">
             © 2025 SeekCa. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-0">
-            <Link href="/privacy" className="text-gray-400 dark:text-gray-300 hover:text-white text-sm transition-colors">
+            <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-gray-400 dark:text-gray-300 hover:text-white text-sm transition-colors">
+            <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
               Terms of Service
             </Link>
-            <Link href="/contact" className="text-gray-400 dark:text-gray-300 hover:text-white text-sm transition-colors">
+            <Link href="/contact" className="text-gray-400 hover:text-white text-sm transition-colors">
               Contact
             </Link>
           </div>
