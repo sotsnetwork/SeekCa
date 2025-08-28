@@ -139,7 +139,7 @@ export default function SignUp() {
 
             {/* Role Selection */}
             <div className="space-y-3">
-              <Label className="text-base font-medium text-gray-900 dark:text-white">I want to:</Label>
+                             <Label className="text-base font-medium">I want to:</Label>
               <RadioGroup
                 value={role}
                 onValueChange={(value) => setRole(value as UserRole)}
@@ -153,7 +153,7 @@ export default function SignUp() {
                   />
                                      <Label
                      htmlFor="professional"
-                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-gray-900 dark:text-white"
+                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                    >
                      <User className="mb-3 h-6 w-6" />
                      <div className="text-center">
@@ -170,7 +170,7 @@ export default function SignUp() {
                    />
                    <Label
                      htmlFor="hirer"
-                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-gray-900 dark:text-white"
+                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                    >
                      <Building className="mb-3 h-6 w-6" />
                      <div className="text-center">
@@ -223,7 +223,7 @@ export default function SignUp() {
              )}
 
              <div className="space-y-2">
-               <Label htmlFor="email" className="text-gray-900 dark:text-white">Email</Label>
+                               <Label htmlFor="email">Email</Label>
                <Input
                  id="email"
                  type="email"
@@ -234,7 +234,7 @@ export default function SignUp() {
              </div>
 
              <div className="space-y-2">
-               <Label htmlFor="password" className="text-gray-900 dark:text-white">Password</Label>
+                               <Label htmlFor="password">Password</Label>
                <Input
                  id="password"
                  type="password"
