@@ -17,11 +17,11 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-20">
+             <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center px-2">
                          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6">
-               Find Top <span className="text-blue-600 dark:text-blue-400">Professionals</span><br />
+               Find Top <span className="text-blue-600">Professionals</span><br />
                For Your Projects
              </h1>
              <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-3xl mx-auto">
@@ -120,9 +120,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                          <Card className="text-center border-0 shadow-lg">
                <CardHeader>
-                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                   <Search className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
-                 </div>
+                                   <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <Search className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                  </div>
                  <CardTitle className="text-lg md:text-xl">1. Search & Browse</CardTitle>
                </CardHeader>
                <CardContent>
@@ -134,9 +134,9 @@ export default function Home() {
 
              <Card className="text-center border-0 shadow-lg">
                <CardHeader>
-                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                   <UserCheck className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
-                 </div>
+                                   <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <UserCheck className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                  </div>
                  <CardTitle className="text-lg md:text-xl">2. Connect & Hire</CardTitle>
                </CardHeader>
                <CardContent>
@@ -148,9 +148,9 @@ export default function Home() {
 
              <Card className="text-center border-0 shadow-lg">
                <CardHeader>
-                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                   <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
-                 </div>
+                                   <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                  </div>
                  <CardTitle className="text-lg md:text-xl">3. Get Results</CardTitle>
                </CardHeader>
                <CardContent>
@@ -177,33 +177,33 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                 <Shield className="w-6 h-6 text-blue-600" />
+               </div>
                              <h3 className="text-lg font-semibold mb-2">Verified Professionals</h3>
                <p className="text-muted-foreground">All professionals go through our comprehensive verification process</p>
             </div>
 
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                 <Star className="w-6 h-6 text-blue-600" />
+               </div>
                              <h3 className="text-lg font-semibold mb-2">Quality Ratings</h3>
                <p className="text-muted-foreground">Transparent review system to help you make informed decisions</p>
             </div>
 
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                 <Users className="w-6 h-6 text-blue-600" />
+               </div>
                              <h3 className="text-lg font-semibold mb-2">Team Formation</h3>
                <p className="text-muted-foreground">Build teams of professionals for larger, complex projects</p>
             </div>
 
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                 <TrendingUp className="w-6 h-6 text-blue-600" />
+               </div>
                              <h3 className="text-lg font-semibold mb-2">Growth Tracking</h3>
                <p className="text-muted-foreground">Monitor your project progress and professional development</p>
             </div>
@@ -250,7 +250,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 dark:bg-blue-700">
+             <section className="py-20 bg-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 md:mb-4">
             Ready to Get Started?
