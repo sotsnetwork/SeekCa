@@ -266,7 +266,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/auth/signup" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="text-base md:text-lg px-6 py-2 md:px-8 md:py-3 text-white border-white hover:bg-white hover:text-blue-600 w-full">
+              <Button size="lg" variant="outline" className="text-base md:text-lg px-6 py-2 md:px-8 md:py-3 text-white border-2 border-white hover:bg-white hover:text-blue-600 hover:border-white font-semibold w-full">
                 <Users className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                 Hire Professionals
               </Button>
