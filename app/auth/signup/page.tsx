@@ -241,7 +241,6 @@ export default function SignUp() {
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
                  required
-                 className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                />
              </div>
 
@@ -251,9 +250,7 @@ export default function SignUp() {
                  id="confirmPassword"
                  type="password"
                  value={confirmPassword}
-                 onChange={(e) => setConfirmPassword(e.target.value)}
                  required
-                 className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                />
              </div>
 
