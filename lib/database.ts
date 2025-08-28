@@ -646,3 +646,6 @@ export {
   messageQueries,
   searchService
 }
+
+// Alias for backward compatibility
+export const professionalQueries = professionalProfileQueries
