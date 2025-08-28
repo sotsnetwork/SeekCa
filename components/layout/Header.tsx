@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NotificationCenter } from '@/components/ui/notification-center'
@@ -22,6 +23,7 @@ export default function Header() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     // Get initial user
@@ -78,6 +80,24 @@ export default function Header() {
     return profile?.role === 'professional' ? '/dashboard/professional' : '/dashboard/hirer'
   }
 
+  const isActiveLink = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(href)
+  }
+
+  const getLinkClasses = (href: string) => {
+    const baseClasses = "transition-colors"
+    const isActive = isActiveLink(href)
+    
+    if (isActive) {
+      return `${baseClasses} text-gray-900 font-semibold`
+    }
+    
+    return `${baseClasses} text-gray-600 hover:text-gray-900`
+  }
+
   return (
         <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,13 +115,13 @@ export default function Header() {
 
           {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center space-x-8 mx-auto">
-                         <Link href="/browse" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/browse" className={getLinkClasses('/browse')}>
               Browse Professionals
             </Link>
-                         <Link href="/jobs" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/jobs" className={getLinkClasses('/jobs')}>
               Find Jobs
             </Link>
-                         <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/how-it-works" className={getLinkClasses('/how-it-works')}>
               How It Works
             </Link>
           </nav>
@@ -193,21 +213,21 @@ export default function Header() {
             <div className="flex flex-col space-y-4">
                              <Link 
                  href="/browse" 
-                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 className={getLinkClasses('/browse')}
                  onClick={() => setIsMenuOpen(false)}
                >
                 Browse Professionals
               </Link>
                              <Link 
                  href="/jobs" 
-                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 className={getLinkClasses('/jobs')}
                  onClick={() => setIsMenuOpen(false)}
                >
                 Find Jobs
               </Link>
                              <Link 
                  href="/how-it-works" 
-                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 className={getLinkClasses('/how-it-works')}
                  onClick={() => setIsMenuOpen(false)}
                >
                 How It Works
