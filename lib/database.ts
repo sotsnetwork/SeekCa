@@ -216,6 +216,8 @@ const applicationQueries = {
   }
 }
 
+// Professional profile queries
+const professionalProfileQueries = {
   async getProfessionalProfile(userId: string) {
     const { data, error } = await supabase
       .from('professional_profiles')
