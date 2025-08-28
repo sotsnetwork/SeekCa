@@ -118,47 +118,47 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <Search className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-lg md:text-xl">1. Search & Browse</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-sm md:text-base">
-                  Browse through our curated list of verified professionals or post your project requirements
-                </CardDescription>
-              </CardContent>
-            </Card>
+                         <Card className="text-center border-0 shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+               <CardHeader>
+                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                   <Search className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
+                 </div>
+                 <CardTitle className="text-lg md:text-xl text-gray-900 dark:text-white">1. Search & Browse</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription className="text-sm md:text-base text-gray-600 dark:text-gray-300">
+                   Browse through our curated list of verified professionals or post your project requirements
+                 </CardDescription>
+               </CardContent>
+             </Card>
 
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <UserCheck className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-lg md:text-xl">2. Connect & Hire</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-sm md:text-base">
-                  Review profiles, portfolios, and ratings. Connect with professionals that match your needs
-                </CardDescription>
-              </CardContent>
-            </Card>
+             <Card className="text-center border-0 shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+               <CardHeader>
+                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                   <UserCheck className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
+                 </div>
+                 <CardTitle className="text-lg md:text-xl text-gray-900 dark:text-white">2. Connect & Hire</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription className="text-sm md:text-base text-gray-600 dark:text-gray-300">
+                   Review profiles, portfolios, and ratings. Connect with professionals that match your needs
+                 </CardDescription>
+               </CardContent>
+             </Card>
 
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-lg md:text-xl">3. Get Results</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-sm md:text-base">
-                  Work with your chosen professional, track progress, and leave reviews upon completion
-                </CardDescription>
-              </CardContent>
-            </Card>
+             <Card className="text-center border-0 shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+               <CardHeader>
+                 <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                   <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
+                 </div>
+                 <CardTitle className="text-lg md:text-xl text-gray-900 dark:text-white">3. Get Results</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription className="text-sm md:text-base text-gray-600 dark:text-gray-300">
+                   Work with your chosen professional, track progress, and leave reviews upon completion
+                 </CardDescription>
+               </CardContent>
+             </Card>
           </div>
         </div>
       </section>
