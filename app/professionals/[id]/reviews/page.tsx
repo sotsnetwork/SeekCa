@@ -248,7 +248,7 @@ export default function ProfessionalReviewsPage() {
                 <h3 className="text-xs md:text-sm font-medium text-gray-900 mb-2 md:mb-3">Rating Distribution</h3>
                 <div className="space-y-1 md:space-y-2">
                   {[5, 4, 3, 2, 1].map((rating) => {
-                    const count = statistics?.rating_distribution?.[rating as keyof typeof statistics.rating_distribution] || 0
+                    const count = statistics?.rating_distribution?.[rating.toString() as keyof typeof statistics.rating_distribution] || 0
                     const percentage = statistics?.total_reviews 
                       ? (count / statistics.total_reviews) * 100 
                       : 0
