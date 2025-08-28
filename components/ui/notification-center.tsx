@@ -21,7 +21,7 @@ export function NotificationCenter({ userId }: NotificationCenterProps) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
-  const unsubscribeRef = useRef<() => void>()
+  const unsubscribeRef = useRef<(() => void) | undefined>(undefined)
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -41,12 +41,12 @@ export function NotificationCenter({ userId }: NotificationCenterProps) {
     fetchNotifications()
 
     // Subscribe to real-time notifications
-    const unsubscribe = notificationService.subscribeToRealtime(userId, (notification) => {
+    notificationService.subscribeToRealtime(userId, (notification) => {
       setNotifications(prev => [notification, ...prev].slice(0, 20))
       setUnreadCount(prev => prev + 1)
+    }).then(unsubscribe => {
+      unsubscribeRef.current = unsubscribe
     })
-
-    unsubscribeRef.current = unsubscribe
 
     return () => {
       if (unsubscribeRef.current) {
