@@ -61,7 +61,7 @@ export default function JobsPage() {
 
   useEffect(() => {
     // Load initial filters from URL
-    const initialFilters = searchService.buildJobFiltersFromUrl(searchParams)
+    const initialFilters = searchService.buildJobFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
     handleSearch(initialFilters)
   }, [searchParams])
 
@@ -111,7 +111,7 @@ export default function JobsPage() {
   }
 
   const handleLoadMore = () => {
-    const currentFilters = searchService.buildJobFiltersFromUrl(searchParams)
+    const currentFilters = searchService.buildJobFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
     handleSearch(currentFilters, currentPage + 1)
   }
 
@@ -151,7 +151,7 @@ export default function JobsPage() {
     return `${diffInWeeks} weeks ago`
   }
 
-  const currentFilters = searchService.buildJobFiltersFromUrl(searchParams)
+  const currentFilters = searchService.buildJobFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -235,13 +235,13 @@ export default function JobsPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Urgent Hiring</span>
                   <span className="font-semibold text-red-600">
-                    {jobs.filter(job => job.urgent).length}
+                    {jobs.filter(job => job.is_urgent).length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Verified Companies</span>
+                  <span className="text-sm text-gray-600">Remote Jobs</span>
                   <span className="font-semibold text-green-600">
-                    {jobs.filter(job => job.verified).length}
+                    {jobs.filter(job => job.remote_allowed).length}
                   </span>
                 </div>
               </CardContent>
