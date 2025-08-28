@@ -639,3 +639,10 @@ const searchService = {
     return params
   }
 }
+
+export { 
+  professionalProfileQueries,
+  applicationQueries,
+  messageQueries,
+  searchService
+}
