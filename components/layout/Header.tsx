@@ -81,7 +81,7 @@ export default function Header() {
   return (
         <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex items-center h-16 md:h-20">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
@@ -93,8 +93,8 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden md:flex items-center space-x-8 mx-auto">
             <Link href="/browse" className="text-muted-foreground hover:text-foreground transition-colors">
               Browse Professionals
             </Link>
@@ -106,7 +106,7 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Desktop Auth */}
+          {/* Desktop Auth - Right Side */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
             {user ? (
@@ -172,7 +172,7 @@ export default function Header() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="md:hidden flex items-center space-x-2 ml-auto">
             <ThemeToggle />
             <Button
               variant="outline"
