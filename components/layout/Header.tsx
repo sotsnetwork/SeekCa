@@ -16,7 +16,7 @@ import {
 import { Briefcase, User, LogOut, Menu, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { UserProfile } from '@/lib/supabase'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
@@ -79,7 +79,7 @@ export default function Header() {
   }
 
   return (
-        <header className="bg-background border-b border-border sticky top-0 z-50">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16 md:h-20">
           {/* Logo */}
@@ -95,20 +95,19 @@ export default function Header() {
 
           {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center space-x-8 mx-auto">
-            <Link href="/browse" className="text-muted-foreground hover:text-foreground transition-colors">
+                         <Link href="/browse" className="text-gray-600 hover:text-gray-900 transition-colors">
               Browse Professionals
             </Link>
-            <Link href="/jobs" className="text-muted-foreground hover:text-foreground transition-colors">
+                         <Link href="/jobs" className="text-gray-600 hover:text-gray-900 transition-colors">
               Find Jobs
             </Link>
-            <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                         <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors">
               How It Works
             </Link>
           </nav>
 
           {/* Desktop Auth - Right Side */}
           <div className="hidden md:flex items-center space-x-4">
-            <ThemeToggle />
             {user ? (
               <>
                 <NotificationCenter userId={user.id} />
@@ -130,9 +129,9 @@ export default function Header() {
                           : user.email
                         }
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
+                                             <p className="text-xs leading-none text-gray-500">
+                         {user.email}
+                       </p>
                       <p className="text-xs leading-none text-blue-600 capitalize">
                         {profile?.role}
                       </p>
@@ -173,7 +172,6 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2 ml-auto">
-            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
@@ -191,44 +189,44 @@ export default function Header() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-background">
+                     <div className="md:hidden py-4 border-t border-gray-200 bg-white">
             <div className="flex flex-col space-y-4">
-              <Link 
-                href="/browse" 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
+                             <Link 
+                 href="/browse" 
+                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 onClick={() => setIsMenuOpen(false)}
+               >
                 Browse Professionals
               </Link>
-              <Link 
-                href="/jobs" 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
+                             <Link 
+                 href="/jobs" 
+                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 onClick={() => setIsMenuOpen(false)}
+               >
                 Find Jobs
               </Link>
-              <Link 
-                href="/how-it-works" 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
+                             <Link 
+                 href="/how-it-works" 
+                 className="text-gray-600 hover:text-gray-900 transition-colors"
+                 onClick={() => setIsMenuOpen(false)}
+               >
                 How It Works
               </Link>
               
               {user ? (
-                <div className="pt-4 border-t border-border space-y-4">
+                                 <div className="pt-4 border-t border-gray-200 space-y-4">
                   <div className="flex items-center space-x-3 mb-4">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={profile?.avatar_url} alt={profile?.first_name || ''} />
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {profile?.first_name && profile?.last_name 
-                          ? `${profile.first_name} ${profile.last_name}`
-                          : user.email
-                        }
-                      </p>
+                                             <p className="text-sm font-medium text-gray-900">
+                         {profile?.first_name && profile?.last_name 
+                           ? `${profile.first_name} ${profile.last_name}`
+                           : user.email
+                         }
+                       </p>
                       <p className="text-xs text-blue-600 capitalize">{profile?.role}</p>
                     </div>
                   </div>
@@ -256,7 +254,7 @@ export default function Header() {
                   </div>
                 </div>
               ) : (
-                <div className="pt-4 border-t border-border flex flex-col space-y-2">
+                                 <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
                   <Link href="/auth/login" className="w-full">
                     <Button variant="ghost" className="w-full">Sign in</Button>
                   </Link>
