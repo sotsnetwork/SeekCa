@@ -52,10 +52,10 @@ export default function SearchPage() {
     setActiveTab(searchType)
     
     if (searchType === 'jobs') {
-      const filters = searchService.buildJobFiltersFromUrl(searchParams)
+      const filters = searchService.buildJobFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
       handleJobSearch(filters)
     } else {
-      const filters = searchService.buildProfessionalFiltersFromUrl(searchParams)
+      const filters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
       handleProfessionalSearch(filters)
     }
   }, [searchParams])
@@ -164,8 +164,8 @@ export default function SearchPage() {
     return name.split(' ').map(n => n[0]).join('')
   }
 
-  const currentJobFilters = searchService.buildJobFiltersFromUrl(searchParams)
-  const currentProfessionalFilters = searchService.buildProfessionalFiltersFromUrl(searchParams)
+  const currentJobFilters = searchService.buildJobFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
+  const currentProfessionalFilters = searchService.buildProfessionalFiltersFromUrl(new URLSearchParams(Object.fromEntries(searchParams)))
 
   return (
     <div className="min-h-screen bg-gray-50">
