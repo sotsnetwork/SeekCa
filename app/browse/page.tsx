@@ -151,7 +151,7 @@ export default function BrowsePage() {
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gray-50 rounded-xl p-4 md:p-6 space-y-4">
+          <div className="bg-gray-50 rounded-2xl p-4 md:p-6 space-y-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
@@ -251,14 +251,14 @@ export default function BrowsePage() {
               setLocationFilter('')
               setRateFilter('all')
               setAvailabilityFilter('all')
-            }}>
+            }} className="rounded-xl">
               Clear All Filters
             </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {filteredProfessionals.map((professional) => (
-              <Card key={professional.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white">
+              <Card key={professional.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
                 <CardHeader className="pb-3 md:pb-4">
                   <div className="flex items-start space-x-3 md:space-x-4">
                     <Avatar className="w-14 h-14 md:w-16 md:h-16 ring-2 ring-blue-100">
@@ -335,7 +335,7 @@ export default function BrowsePage() {
 
                   <div className="pt-1 md:pt-2">
                     <Link href={`/professionals/${professional.user_id}`}>
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm h-9">
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm h-9 rounded-xl">
                         View Profile
                       </Button>
                     </Link>
