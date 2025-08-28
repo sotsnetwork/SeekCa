@@ -196,7 +196,7 @@ export default function Header() {
               variant="outline"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-1 h-8 w-8"
+              className="p-1 h-8 w-8 rounded-xl"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -209,7 +209,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-                     <div className="md:hidden py-4 border-t border-gray-200 bg-white">
+          <div className="md:hidden py-4 border-t border-gray-200 bg-white rounded-b-2xl">
             <div className="flex flex-col space-y-4">
                              <Link 
                  href="/browse" 
@@ -252,20 +252,20 @@ export default function Header() {
                   </div>
                   <div className="flex flex-col space-y-2">
                     <Link href={getDashboardPath()}>
-                      <Button variant="ghost" className="w-full justify-start text-left">
+                      <Button variant="ghost" className="w-full justify-start text-left rounded-xl">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Button>
                     </Link>
                     <Link href="/profile">
-                      <Button variant="ghost" className="w-full justify-start text-left">
+                      <Button variant="ghost" className="w-full justify-start text-left rounded-xl">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Button>
                     </Link>
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-start text-left" 
+                      className="w-full justify-start text-left rounded-xl" 
                       onClick={handleSignOut}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -276,10 +276,10 @@ export default function Header() {
               ) : (
                                  <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
                   <Link href="/auth/login" className="w-full">
-                    <Button variant="ghost" className="w-full">Sign in</Button>
+                    <Button variant="ghost" className="w-full rounded-xl">Sign in</Button>
                   </Link>
                   <Link href="/auth/signup" className="w-full">
-                    <Button className="w-full">Get Started</Button>
+                    <Button className="w-full rounded-xl">Get Started</Button>
                   </Link>
                 </div>
               )}
