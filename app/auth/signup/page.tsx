@@ -76,10 +76,10 @@ export default function SignUp() {
     }
   }
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+       if (success) {
+       return (
+         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white border-gray-200">
           <CardHeader className="text-center">
                       <div className="flex items-center justify-center mx-auto mb-4">
             <img 
@@ -88,8 +88,8 @@ export default function SignUp() {
               className="h-16 w-auto"
             />
           </div>
-                         <CardTitle className="text-2xl">Check Your Email</CardTitle>
-             <CardDescription>
+                         <CardTitle className="text-2xl text-gray-900">Check Your Email</CardTitle>
+             <CardDescription className="text-gray-600">
                We've sent you a confirmation link to complete your registration.
              </CardDescription>
           </CardHeader>
@@ -113,9 +113,9 @@ export default function SignUp() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+       return (
+       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white border-gray-200">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img 
@@ -124,8 +124,8 @@ export default function SignUp() {
               className="h-16 w-auto"
             />
           </div>
-                     <CardTitle className="text-2xl">Join SeekCa</CardTitle>
-           <CardDescription>
+                     <CardTitle className="text-2xl text-gray-900">Join SeekCa</CardTitle>
+           <CardDescription className="text-gray-600">
              Create your account to get started
            </CardDescription>
         </CardHeader>
@@ -139,7 +139,7 @@ export default function SignUp() {
 
             {/* Role Selection */}
             <div className="space-y-3">
-                             <Label className="text-base font-medium">I want to:</Label>
+                             <Label className="text-base font-medium text-gray-900">I want to:</Label>
               <RadioGroup
                 value={role}
                 onValueChange={(value) => setRole(value as UserRole)}
@@ -158,7 +158,7 @@ export default function SignUp() {
                      <User className="mb-3 h-6 w-6" />
                      <div className="text-center">
                        <div className="font-medium">Offer Services</div>
-                       <div className="text-xs text-muted-foreground">As a Professional</div>
+                       <div className="text-xs text-gray-500">As a Professional</div>
                      </div>
                    </Label>
                  </div>
@@ -175,7 +175,7 @@ export default function SignUp() {
                      <Building className="mb-3 h-6 w-6" />
                      <div className="text-center">
                        <div className="font-medium">Hire Talent</div>
-                       <div className="text-xs text-muted-foreground">As a Company</div>
+                       <div className="text-xs text-gray-500">As a Company</div>
                      </div>
                    </Label>
                 </div>
@@ -186,7 +186,7 @@ export default function SignUp() {
              {role === 'professional' && (
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                   <Label htmlFor="firstName">First Name</Label>
+                                       <Label htmlFor="firstName" className="text-gray-700">First Name</Label>
                    <Input
                      id="firstName"
                      type="text"
@@ -196,7 +196,7 @@ export default function SignUp() {
                    />
                  </div>
                  <div className="space-y-2">
-                   <Label htmlFor="lastName">Last Name</Label>
+                                       <Label htmlFor="lastName" className="text-gray-700">Last Name</Label>
                    <Input
                      id="lastName"
                      type="text"
@@ -211,7 +211,7 @@ export default function SignUp() {
              {/* Hirer Fields */}
              {role === 'hirer' && (
                <div className="space-y-2">
-                 <Label htmlFor="companyName">Company Name</Label>
+                                   <Label htmlFor="companyName" className="text-gray-700">Company Name</Label>
                  <Input
                    id="companyName"
                    type="text"
@@ -223,7 +223,7 @@ export default function SignUp() {
              )}
 
              <div className="space-y-2">
-                               <Label htmlFor="email">Email</Label>
+                                                               <Label htmlFor="email" className="text-gray-700">Email</Label>
                <Input
                  id="email"
                  type="email"
@@ -234,7 +234,7 @@ export default function SignUp() {
              </div>
 
              <div className="space-y-2">
-                               <Label htmlFor="password">Password</Label>
+                                                               <Label htmlFor="password" className="text-gray-700">Password</Label>
                <Input
                  id="password"
                  type="password"
@@ -245,7 +245,7 @@ export default function SignUp() {
              </div>
 
              <div className="space-y-2">
-                               <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                                               <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
                <Input
                  id="confirmPassword"
                  type="password"
@@ -261,9 +261,9 @@ export default function SignUp() {
           </form>
 
           <div className="mt-6 text-center">
-                         <p className="text-sm text-muted-foreground">
-               Already have an account?{' '}
-               <Link href="/auth/login" className="text-primary hover:underline">
+                                        <p className="text-sm text-gray-600">
+                 Already have an account?{' '}
+               <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 hover:underline">
                  Sign in
                </Link>
              </p>
