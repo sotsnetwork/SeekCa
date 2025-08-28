@@ -95,12 +95,12 @@ export default function SignUp() {
           </CardHeader>
           <CardContent>
             <div className="text-center">
-                             <p className="text-sm text-muted-foreground mb-4">
-                 Didn't receive the email? Check your spam folder or{' '}
-                 <button className="text-primary hover:underline">
-                   resend confirmation
-                 </button>
-               </p>
+                                                           <p className="text-sm text-gray-600 mb-4">
+                  Didn't receive the email? Check your spam folder or{' '}
+                  <button className="text-blue-600 hover:text-blue-700 hover:underline">
+                    resend confirmation
+                  </button>
+                </p>
               <Link href="/auth/login">
                 <Button variant="outline" className="w-full">
                   Back to Login
@@ -151,10 +151,10 @@ export default function SignUp() {
                     id="professional"
                     className="peer sr-only"
                   />
-                                     <Label
-                     htmlFor="professional"
-                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                   >
+                                                                           <Label
+                      htmlFor="professional"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 hover:text-gray-900 peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer"
+                    >
                      <User className="mb-3 h-6 w-6" />
                      <div className="text-center">
                        <div className="font-medium">Offer Services</div>
@@ -168,10 +168,10 @@ export default function SignUp() {
                      id="hirer"
                      className="peer sr-only"
                    />
-                   <Label
-                     htmlFor="hirer"
-                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                   >
+                                       <Label
+                      htmlFor="hirer"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 hover:text-gray-900 peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer"
+                    >
                      <Building className="mb-3 h-6 w-6" />
                      <div className="text-center">
                        <div className="font-medium">Hire Talent</div>
