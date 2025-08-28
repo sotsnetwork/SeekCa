@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, Calendar, Play, Pause, Store as Stop, Save, X, BarChart, DollarSign, Filter, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Clock, Calendar, Play, Pause, Store as Stop, Save, X, BarChart, DollarSign, Filter, ArrowRight, ArrowLeft, CheckCircle, Briefcase } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { projectService, Project, TimeEntry } from '@/lib/project-management'
 import Link from 'next/link'
@@ -132,7 +132,7 @@ export default function TimeTrackingPage() {
         project_id: selectedProject,
         professional_id: user.id,
         milestone_id: selectedMilestone || undefined,
-        entry_type: 'work',
+        entry_type: 'work' as const,
         description: trackingDescription,
         start_time: trackingStartTime.toISOString(),
         end_time: endTime.toISOString(),
@@ -187,7 +187,7 @@ export default function TimeTrackingPage() {
         project_id: manualProject,
         professional_id: user.id,
         milestone_id: manualMilestone || undefined,
-        entry_type: 'work',
+        entry_type: 'work' as const,
         description: manualDescription,
         start_time: startDateTime.toISOString(),
         end_time: endDateTime.toISOString(),
