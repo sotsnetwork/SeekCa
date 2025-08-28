@@ -277,7 +277,7 @@ export default function JobsPage() {
               <p className="text-gray-600">
                 {loading ? 'Loading...' : `Showing ${jobs.length} jobs${totalResults > jobs.length ? ` of ${totalResults}` : ''}`}
               </p>
-              <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+              <select className="border border-gray-300 rounded-xl px-3 py-1 text-sm">
                 <option>Most Recent</option>
                 <option>Salary: High to Low</option>
                 <option>Salary: Low to High</option>
